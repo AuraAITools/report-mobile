@@ -1,0 +1,66 @@
+import { View, Text, useWindowDimensions, StyleSheet, ScrollView } from 'react-native'
+import React from 'react'
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Colors from '@constants/Colors';
+import { AntDesign } from '@expo/vector-icons';
+import { accountsData } from '@assets/data/Accounts';
+import CardList from '@/components/ui/CardList';
+import { usersData } from '@assets/data/Users';
+import { User } from '@/types/User';
+
+export default function AuthenticationScreen() {
+  const { width, height } = useWindowDimensions();
+
+  const dynStyles = {
+    scrollView: {
+      padding: width * 0.05,
+      gap: height * 0.02
+    },
+    authProviders: {
+      width: width * 0.9,
+    }
+  }
+
+  function existingUsersView(accountsData: User[]) {
+    return <CardList data={convertAccountsDataToCardsData(accountsData)} />
+  }
+
+  function signInWithGoogle() {
+    // authCtx.authenticate()
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+        {existingUsersView(usersData)}
+        <Text style={styles.text}>Sign in with</Text>
+        <View style={[styles.authProviders, dynStyles.authProviders]}>
+          <AntDesign onPress={signInWithGoogle} name="google" size={50} color="black" />
+          <AntDesign name="facebook-square" size={50} color="black" />
+        </View>
+    </SafeAreaView>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.light.background
+  },
+  text: {
+    fontSize: 16,
+    alignSelf: "center"
+  },
+  authProviders: {
+    flexDirection: "row",
+    justifyContent: "space-evenly"
+  }
+})
+
+function convertAccountsDataToCardsData(accountsData: User[]) {
+  return accountsData.map(a => {
+    return {
+      title: a.name,
+      link: `/(auth)/accounts/${a.id}`
+    }
+  })
+}
