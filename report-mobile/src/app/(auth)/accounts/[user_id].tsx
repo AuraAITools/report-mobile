@@ -19,7 +19,7 @@ function convertAccountsDataToCardData(accountsData: Account[]) {
   return accountsData.map(a => {
     return {
       title: a.type,
-      link: `(${a.type})/${a.id}`
+      link: `(${a.type}s)/${a.id}`
     }
   })
 }
