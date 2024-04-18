@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native'
+import { View, Text, Pressable, StyleSheet, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { Link } from 'expo-router'
 import { EvilIcons } from '@expo/vector-icons'
@@ -9,14 +9,14 @@ type Props = {
 export default function CardListItem({ title, href }: Props) {
     return (
         <Link href={href} style={styles.card} asChild>
-            <Pressable >
+            <TouchableOpacity >
                 <EvilIcons name="user" size={50} color="black" />
                 <View>
                     <Text>
                         {title.toUpperCase()}
                     </Text>
                 </View>
-            </Pressable>
+            </TouchableOpacity>
         </Link>
     )
 }
