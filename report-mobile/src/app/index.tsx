@@ -6,7 +6,7 @@ import { AntDesign } from '@expo/vector-icons';
 import { accountsData } from '@assets/data/Accounts';
 import CardList from '@/components/ui/CardList';
 import { usersData } from '@assets/data/Users';
-import { User } from '@/types/User';
+import { User } from '@/types/models/User';
 
 export default function AuthenticationScreen() {
   const { width, height } = useWindowDimensions();
@@ -60,7 +60,7 @@ function convertAccountsDataToCardsData(accountsData: User[]) {
   return accountsData.map(a => {
     return {
       title: a.name,
-      link: `/(auth)/accounts/${a.id}`
+      link: `/(authenticated)/accounts/${a.id}`
     }
   })
 }
