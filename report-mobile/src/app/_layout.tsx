@@ -48,6 +48,8 @@ function RootLayoutNav() {
         
         <Stack.Screen name='(authenticated)/(parents)/[parent_id]' options={{title: "Institutions"}} />
         <Stack.Screen name='(authenticated)/(parents)/classes/index' options={{title: "Classes"}}/>
+        <Stack.Screen name='(authenticated)/(parents)/subjects/index' options={{title: "Subjects"}}/>
+        <Stack.Screen name='(authenticated)/(parents)/subjects/dashboard' options={{title: "Dashboard"}}/>
 
         <Stack.Screen name='(authenticated)/accounts/[user_id]' options={{title: "Accounts"}}/>
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />

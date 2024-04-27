@@ -22,7 +22,9 @@ export default function AuthenticationScreen() {
   }
 
   function existingUsersView(accountsData: User[]) {
-    return <CardList data={convertAccountsDataToCardsData(accountsData)} />
+    return <View style={styles.userContainer}>
+      <CardList data={convertAccountsDataToCardsData(accountsData)} />
+    </View>
   }
 
   function signInWithGoogle() {
@@ -59,7 +61,7 @@ export default function AuthenticationScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light.background,
+    backgroundColor: Colors.light.background
   },
   text: {
     fontSize: 16,
@@ -67,7 +69,8 @@ const styles = StyleSheet.create({
   },
   authProviders: {
     flexDirection: "row",
-    justifyContent: "space-evenly"
+    justifyContent: "space-evenly",
+    margin: 20
   },
   divider: {
     flexDirection: "row",
@@ -79,6 +82,9 @@ const styles = StyleSheet.create({
     height: StyleSheet.hairlineWidth,
     backgroundColor: "grey",
     marginHorizontal: 8
+  },
+  userContainer: {
+    flex: 1
   }
 })
 
