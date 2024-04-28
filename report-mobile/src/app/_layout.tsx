@@ -93,6 +93,14 @@ function RootLayoutNav() {
           name='(authenticated)/(parents)/classes/index'
           options={headerOptions("Classes", true, true)}
         />
+        <Stack.Screen
+          name='(authenticated)/(parents)/subjects/index'
+          options={{ title: "Subjects" }}
+        />
+        <Stack.Screen
+          name='(authenticated)/(parents)/subjects/dashboard'
+          options={{ title: "Dashboard" }}
+        />
 
         <Stack.Screen
           name='(authenticated)/accounts/[user_id]'
