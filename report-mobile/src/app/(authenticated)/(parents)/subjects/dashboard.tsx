@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
 import TaskItemsListContainer from '@/components/ui/task-completion/TaskItemsListContainer'
 import GraphView from '@/components/graphs/GraphView'
+import StudentProgressView from '@/components/ui/student-progress/StudentProgressView'
 const lessonData = [
   {
     title: 'lesson 1',
@@ -71,6 +72,7 @@ export default function DashboardScreen() {
         <GraphView data={getRandomData()} />
 
       }
+      <StudentProgressView studentLevel='B3' improvementRate='fast'/>
       <TaskItemsListContainer taskItemData={lessonData} title={'lesson:'} />
     </View>
   )
