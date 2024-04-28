@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
 import TaskItemsListContainer from '@/components/ui/task-completion/TaskItemsListContainer'
 import GraphView from '@/components/graphs/GraphView'
+import LessonProgressView from '@/components/ui/lesson-progress/LessonProgressView'
 const lessonData = [
   {
     title: 'lesson 1',
@@ -47,6 +48,21 @@ function getRandomData() {
   ]
 }
 
+function getLessonProgressOfStudent() {
+  return [
+    {
+      title: 'lessons to CA:',
+      start: 16,
+      end: 40
+    },
+    {
+      title: 'lessons to FY',
+      start: 16,
+      end: 113
+    }
+  ]
+}
+
 export default function DashboardScreen() {
   const [isTestToggle, setIsTestToggle] = useState<boolean>(true);
 
@@ -71,6 +87,7 @@ export default function DashboardScreen() {
         <GraphView data={getRandomData()} />
 
       }
+      <LessonProgressView data={getLessonProgressOfStudent()}/>
       <TaskItemsListContainer taskItemData={lessonData} title={'lesson:'} />
     </View>
   )
