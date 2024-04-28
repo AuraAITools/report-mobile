@@ -32,7 +32,6 @@ export default function ManageInstitutionScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
     alignItems: "center",
   },
   idText: {
@@ -44,7 +43,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 5,
-    width: 200,
+    width: "55%",
   },
   buttonText: {
     color: "black",
