@@ -6,13 +6,15 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native"
-import { Href, Link, useLocalSearchParams } from "expo-router"
+import { Href, Link, useLocalSearchParams, useRouter } from "expo-router"
 
 export default function ManageInstitutionScreen() {
+  const { institution_id } = useLocalSearchParams()
+
   const buttonsMapping = [
     { href: `timeline`, label: "Manage Timelines" },
     { href: `invoices`, label: "Manage invoices" },
-    { href: `classes`, label: "Manage Classes" },
+    { href: `/classes`, label: "Manage Classes" },
     { href: `testgroup`, label: "Manage Test Group" },
     { href: `educators`, label: "Manage Educators" },
     { href: `parents`, label: "Manage Parents" },

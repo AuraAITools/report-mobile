@@ -110,6 +110,10 @@ function RootLayoutNav() {
           name='(authenticated)/(institutions)/[institution_id]'
           options={headerOptions("Institutions", true, true)}
         />
+        <Stack.Screen
+          name='(authenticated)/(institutions)/classes/index'
+          options={headerOptions("Manage Classes", true, true)}
+        />
         <Stack.Screen name='modal' options={{ presentation: "modal" }} />
       </Stack>
     </ThemeProvider>
