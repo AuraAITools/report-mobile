@@ -6,6 +6,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 
 import { useColorScheme } from '@components/useColorScheme';
+import AuthProvider from '@/providers/AuthProvider';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -43,17 +44,19 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack initialRouteName='index'>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        
-        <Stack.Screen name='(authenticated)/(parents)/[parent_id]' options={{title: "Institutions"}} />
-        <Stack.Screen name='(authenticated)/(parents)/classes/index' options={{title: "Classes"}}/>
-        <Stack.Screen name='(authenticated)/(parents)/subjects/index' options={{title: "Subjects"}}/>
-        <Stack.Screen name='(authenticated)/(parents)/subjects/dashboard' options={{title: "Dashboard"}}/>
+      <AuthProvider>
+        <Stack initialRouteName='index'>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
 
-        <Stack.Screen name='(authenticated)/accounts/[user_id]' options={{title: "Accounts"}}/>
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-      </Stack>
+          <Stack.Screen name='(authenticated)/(parents)/[parent_id]' options={{ title: "Institutions" }} />
+          <Stack.Screen name='(authenticated)/(parents)/classes/index' options={{ title: "Classes" }} />
+          <Stack.Screen name='(authenticated)/(parents)/subjects/index' options={{ title: "Subjects" }} />
+          <Stack.Screen name='(authenticated)/(parents)/subjects/dashboard' options={{ title: "Dashboard" }} />
+
+          <Stack.Screen name='(authenticated)/accounts/[user_id]' options={{ title: "Accounts" }} />
+          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+        </Stack>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
