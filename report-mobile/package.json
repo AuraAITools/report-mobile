@@ -19,7 +19,9 @@
     "@supabase/supabase-js": "^2.43.2",
     "aes-js": "^3.1.2",
     "expo": "~50.0.14",
+    "expo-env": "^1.1.1",
     "expo-font": "~11.10.3",
+    "expo-image-picker": "~14.7.1",
     "expo-linear-gradient": "~12.7.2",
     "expo-linking": "~6.2.2",
     "expo-router": "~3.4.8",
@@ -31,6 +33,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-native": "0.73.6",
+    "react-native-dotenv": "^3.4.11",
     "react-native-elements": "^3.4.3",
     "react-native-get-random-values": "^1.11.0",
     "react-native-gifted-charts": "^1.4.10",
@@ -38,8 +41,7 @@
     "react-native-screens": "~3.29.0",
     "react-native-svg": "14.1.0",
     "react-native-url-polyfill": "^2.0.0",
-    "react-native-web": "~0.19.6",
-    "expo-image-picker": "~14.7.1"
+    "react-native-web": "~0.19.6"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
