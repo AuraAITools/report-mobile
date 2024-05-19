@@ -4,17 +4,14 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native"
-import { NativeStackNavigationOptions } from "@react-navigation/native-stack"
 import { useFonts } from "expo-font"
-import { Stack, useRouter } from "expo-router"
+import { Stack} from "expo-router"
 import * as SplashScreen from "expo-splash-screen"
 import { useEffect } from "react"
 
 import { useColorScheme } from '@components/useColorScheme';
 import AuthProvider from '@/providers/AuthProvider';
-import { Ionicons } from "@expo/vector-icons"
-import { TouchableOpacity, StyleSheet } from "react-native"
-import Dropdown from "@/components/ui/Dropdown"
+import { StyleSheet } from "react-native"
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -50,69 +47,15 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme()
-  const router = useRouter()
-
-  const handleGoBack = () => {
-    router.back()
-  }
-
-  const headerOptions = (
-    title: string,
-    showLeftHeader: boolean,
-    showRightHeader: boolean
-  ): NativeStackNavigationOptions => {
-    return {
-      title,
-      headerLeft: showLeftHeader
-        ? (props) => (
-            <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
-              <Ionicons name='arrow-back' size={24} color='white' />
-            </TouchableOpacity>
-          )
-        : undefined,
-      headerRight: showRightHeader
-        ? (props) => (
-            <Dropdown
-              items={[{ value: "test1" }, { value: "test2" }]}
-            ></Dropdown>
-          )
-        : undefined,
-      headerTitleAlign: "center",
-    }
-  }
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack initialRouteName='index'>
-        <Stack.Screen name='index' options={{ headerShown: false }} />
-
-        <Stack.Screen
-          name='(authenticated)/(parents)/[parent_id]'
-          options={headerOptions("Institutions", true, true)}
-        />
-        <Stack.Screen
-          name='(authenticated)/(parents)/classes/index'
-          options={headerOptions("Classes", true, true)}
-        />
-        <Stack.Screen
-          name='(authenticated)/(parents)/subjects/index'
-          options={{ title: "Subjects" }}
-        />
-        <Stack.Screen
-          name='(authenticated)/(parents)/subjects/dashboard'
-          options={{ title: "Dashboard" }}
-        />
-
-        <Stack.Screen
-          name='(authenticated)/accounts/[user_id]'
-          options={headerOptions("Accounts", false, false)}
-        />
-        <Stack.Screen
-          name='(authenticated)/(institutions)/[institution_id]'
-          options={headerOptions("Institutions", true, true)}
-        />
-        <Stack.Screen name='modal' options={{ presentation: "modal" }} />
-      </Stack>
+      <AuthProvider>
+        <Stack screenOptions={{headerShown: false}}>
+          <Stack.Screen name='(auth)' />
+          <Stack.Screen name='(authenticated)' />
+        </Stack>
+      </AuthProvider>
     </ThemeProvider>
   )
 }
