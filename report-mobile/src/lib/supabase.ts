@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import "react-native-url-polyfill/auto";
 import * as aesjs from 'aes-js';
 import 'react-native-get-random-values';
-
+import {supabaseConfig} from '../configs/supabaseConfig'
 export class LargeSecureStore {
   private async _encrypt(key: string, value: string) {
     const encryptionKey = crypto.getRandomValues(new Uint8Array(256 / 8));
@@ -49,10 +49,8 @@ export class LargeSecureStore {
   }
 }
 
-const supabaseUrl = '';
-const supabaseAnonKey = '';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient(supabaseConfig.url, supabaseConfig.anonPublicKey, {
   auth: {
     storage: new LargeSecureStore(),
     autoRefreshToken: true,
