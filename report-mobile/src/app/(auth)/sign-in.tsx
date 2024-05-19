@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Colors from '../../constants/Colors';
 import { Link, Stack } from 'expo-router';
 import { supabase } from '@/lib/supabase';
+import GoogleSignInButton from '@components/GoogleSignInButton.native';
 
 const SignInScreen = () => {
   const [email, setEmail] = useState('');
@@ -49,6 +50,7 @@ const SignInScreen = () => {
       <Link href="/sign-up" style={styles.textButton}>
         Create an account
       </Link>
+      <GoogleSignInButton/>
     </View>
   );
 };
