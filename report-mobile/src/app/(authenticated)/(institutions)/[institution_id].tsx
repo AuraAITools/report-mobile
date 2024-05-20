@@ -6,7 +6,8 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native"
-import { Href, Link, useLocalSearchParams } from "expo-router"
+import { Href, Link } from "expo-router"
+
 
 export default function ManageInstitutionScreen() {
   const buttonsMapping = [
@@ -21,6 +22,7 @@ export default function ManageInstitutionScreen() {
     { href: `material`, label: "Manage Materials" },
     { href: `dashboard`, label: "Admin Dashboard" },
   ]
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -64,4 +66,7 @@ const styles = StyleSheet.create({
   scrollContainer: {
     paddingBottom: 20,
   },
+  backButton: {
+    padding: 8,
+  }
 })
