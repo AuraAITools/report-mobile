@@ -13,7 +13,7 @@ const AuthenticatedLayout = () => {
   // if user is authenticated redirect to accounts screen
   useEffect(() => {
     if (!loading && session) {
-      router.push(`(accounts)/${session.user.id}` as Href<string>)
+      router.replace(`(accounts)/${session.user.id}` as Href<string>)
     }
   }, [session, loading])
 
@@ -55,12 +55,14 @@ const AuthenticatedLayout = () => {
 
   return (
     <Stack initialRouteName='(accounts)/[user_id]'>
-      <Stack.Screen name='(accounts)/[user_id]'></Stack.Screen>
-      <Stack.Screen name='(educators)'></Stack.Screen>
-      <Stack.Screen name='(institutions)/[institution_id]'
-        options={headerOptions("Institutions", true)}
-      ></Stack.Screen>
-      <Stack.Screen name='(parents)'></Stack.Screen>
+      <Stack.Screen name='(accounts)/[user_id]' options={headerOptions("Accounts", true)} />
+      <Stack.Screen name='(accounts)/create-institution' options={headerOptions("Create Institution", true)} />
+      <Stack.Screen name='(accounts)/create-parent' options={headerOptions("Create Parent", true)} />
+      <Stack.Screen name='(accounts)/create-educator' options={headerOptions("Create Educator", true)} />
+      <Stack.Screen name='(accounts)/create-student' options={headerOptions("Create Student", true)} />
+      <Stack.Screen name='(educators)' options={headerOptions("Educators", true)} />
+      <Stack.Screen name='(institutions)/[institution_id]' options={headerOptions("Institutions", true)} />
+      <Stack.Screen name='(parents)' options={headerOptions("Parents", true)} />
     </Stack>
   )
 }
