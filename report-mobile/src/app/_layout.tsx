@@ -5,13 +5,14 @@ import {
   ThemeProvider,
 } from "@react-navigation/native"
 import { useFonts } from "expo-font"
-import { Stack} from "expo-router"
+import { Stack } from "expo-router"
 import * as SplashScreen from "expo-splash-screen"
 import { useEffect } from "react"
 
 import { useColorScheme } from '@components/useColorScheme';
 import AuthProvider from '@/providers/AuthProvider';
 import { StyleSheet } from "react-native"
+import QueryProvider from "@/providers/QueryProvider"
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -51,10 +52,12 @@ function RootLayoutNav() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <AuthProvider>
-        <Stack screenOptions={{headerShown: false}}>
-          <Stack.Screen name='(auth)' />
-          <Stack.Screen name='(authenticated)' />
-        </Stack>
+        <QueryProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name='(auth)' />
+            <Stack.Screen name='(authenticated)' />
+          </Stack>
+        </QueryProvider>
       </AuthProvider>
     </ThemeProvider>
   )

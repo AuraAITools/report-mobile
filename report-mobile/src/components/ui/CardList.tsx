@@ -6,7 +6,7 @@ interface Props {
     data: CardData[]
 }
 
-interface CardData {
+export interface CardData {
     title: string,
     link: string
 }
@@ -16,7 +16,9 @@ export default function CardList({ data }: Props) {
         <View style={styles.container}>
             <FlatList
                 data={data}
-                renderItem={({ item }) => <CardListItem title={item.title} href={item.link} />} 
+                renderItem={({ item }) => {
+                    return <CardListItem title={item.title} href={item.link}/>
+                }} 
                 numColumns={1}
             />
         </View>
