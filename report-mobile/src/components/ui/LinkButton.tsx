@@ -1,0 +1,46 @@
+import React from "react"
+import {
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  ViewStyle,
+  TextStyle,
+} from "react-native"
+import { Link, Href } from "expo-router"
+
+interface LinkButtonProps {
+  href: string
+  label: string
+  buttonStyle?: ViewStyle
+  textStyle?: TextStyle
+  linkStyle?: ViewStyle
+}
+
+const LinkButton: React.FC<LinkButtonProps> = ({
+  href,
+  label,
+  buttonStyle,
+  textStyle,
+  linkStyle,
+}) => {
+  return (
+    <Link href={href as Href<string>} style={linkStyle} asChild>
+      <TouchableOpacity style={{ ...styles.button, ...buttonStyle }}>
+        <Text style={{ ...styles.buttonText, ...textStyle }}>{label}</Text>
+      </TouchableOpacity>
+    </Link>
+  )
+}
+
+const styles = StyleSheet.create({
+  button: {
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  buttonText: {
+    fontSize: 16,
+  },
+})
+
+export default LinkButton
