@@ -2,15 +2,9 @@ import React from "react"
 import { View, Text, StyleSheet, Button } from "react-native"
 import { useRouter } from "expo-router"
 import LinkButton from "@/components/ui/LinkButton"
-import {
-  buttonVerticalPadding,
-  constmaxWidth,
-  minWidth,
-} from "@/constants/ScreenDimension"
+import { constmaxWidth, minWidth } from "@/constants/ScreenDimension"
 
 const SplashScreen: React.FC = () => {
-  const router = useRouter()
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Better Learning Begins Here</Text>
@@ -43,14 +37,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 32,
+    fontWeight: "800",
     textAlign: "center",
-    marginBottom: 8,
+    marginBottom: 20,
+    width: "80%",
+    flexShrink: 1,
   },
   subtitle: {
-    fontSize: 16,
-    color: "gray",
+    fontSize: 17,
+    color: "#000000",
+    opacity: 0.7,
     textAlign: "center",
     marginBottom: 24,
   },
@@ -64,6 +61,7 @@ const styles = StyleSheet.create({
   signInButtonText: {
     color: "#fff",
     fontSize: 16,
+    fontWeight: "600",
   },
   spacer: {
     height: 16,
@@ -79,6 +77,7 @@ const styles = StyleSheet.create({
   },
   signUpButtonText: {
     color: "#000",
+    fontWeight: "600",
   },
 })
 
