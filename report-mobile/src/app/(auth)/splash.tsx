@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Button } from "react-native"
 import { useRouter } from "expo-router"
 import LinkButton from "@/components/ui/LinkButton"
 import { constmaxWidth, minWidth } from "@/constants/ScreenDimension"
+import Spacer from "@/components/ui/Spacer"
 
 const SplashScreen: React.FC = () => {
   return (
@@ -16,7 +17,7 @@ const SplashScreen: React.FC = () => {
           buttonStyle={styles.signInButton}
           textStyle={styles.signInButtonText}
         />
-        <View style={styles.spacer} />
+        <Spacer />
         <LinkButton
           href='/sign-up'
           label='Continue Registration'
@@ -62,9 +63,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
-  },
-  spacer: {
-    height: 16,
   },
   signUpButton: {
     minWidth: minWidth,

@@ -1,79 +1,157 @@
-import { View, Text, TextInput, StyleSheet, Alert, Button } from 'react-native';
-import React, { useState } from 'react';
-import Colors from '../../constants/Colors';
-import { Link, Stack } from 'expo-router';
-import { supabase } from '@/lib/supabase';
-import GoogleSignInButton from '@/components/GoogleSignInButton.native';
-const SignUpScreen = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+// src/screens/SignUpScreen.tsx
+import React, { useState } from "react"
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  Switch,
+} from "react-native"
+import { Link } from "expo-router"
+import Spacer from "@/components/ui/Spacer"
+import Icon from "react-native-vector-icons/MaterialIcons"
+import PasswordInput from "@/components/ui/inputs/PasswordInput"
+import GenericInput from "@/components/ui/inputs/GenericInput"
 
-  async function signUpWithEmail() {
-    setLoading(true);
-    const { error } = await supabase.auth.signUp({ email, password });
+const SignUpScreen: React.FC = () => {
+  const [email, setEmail] = useState("")
+  const [isPasswordShown, setIsPasswordShown] = useState(false)
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [getDailyReports, setGetDailyReports] = useState(false)
+  const [getweeklySummary, setGetWeeklySummary] = useState(true)
 
-    if (error) Alert.alert(error.message);
-    setLoading(false);
+  const toggleIsPasswordShown = () => {
+    setIsPasswordShown(!isPasswordShown)
   }
 
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{title: "Sign Up", headerTitleAlign: 'center'}}/>
-      <Text style={styles.label}>Email</Text>
-      <TextInput
-        value={email}
-        onChangeText={setEmail}
-        placeholder="example@gmail.com"
-        style={styles.input}
+      <View style={styles.iconContainer}>
+        <Text style={styles.icon}>{"✦"}</Text>
+      </View>
+      <Text style={styles.title}>Sign up</Text>
+      <GenericInput
+        title='Email'
+        placeholder='example@gmail.com'
+        keyboardType={"email-address"}
       />
-
-      <Text style={styles.label}>Password</Text>
-      <TextInput
-        value={password}
-        onChangeText={setPassword}
-        placeholder=""
-        style={styles.input}
-        secureTextEntry
+      <Spacer height={8} />
+      <PasswordInput
+        title='Create a password'
+        placeholder='must be 8 characters'
       />
-
-      <Button
-        onPress={signUpWithEmail}
-        disabled={loading}
-        title={loading ? 'Creating account...' : 'Create account'}
-      />
-      <Link href="/sign-in" style={styles.textButton}>
-        Sign in
-      </Link>
-      <GoogleSignInButton/>
+      <Spacer height={8} />
+      <PasswordInput title='Confirm password' placeholder='repeat password' />
+      <View style={styles.switchContainer}>
+        <Text>Daily reports</Text>
+        <Switch value={getDailyReports} onValueChange={setGetDailyReports} />
+      </View>
+      <Text style={styles.switchText}>
+        Get a daily activity report via email.
+      </Text>
+      <View style={styles.switchContainer}>
+        <Text>Weekly summary</Text>
+        <Switch value={getweeklySummary} onValueChange={setGetWeeklySummary} />
+      </View>
+      <Text style={styles.switchText}>
+        Get a weekly activity report via email.
+      </Text>
+      <TouchableOpacity style={styles.button}>
+        <Text style={styles.buttonText}>Log in</Text>
+      </TouchableOpacity>
+      <Text style={styles.footerText}>
+        Already have an account?{" "}
+        <Link href='/login' style={styles.loginLink}>
+          Log in
+        </Link>
+      </Text>
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    justifyContent: 'center',
     flex: 1,
+    padding: 16,
+    backgroundColor: "#fff",
   },
-  label: {
-    color: 'gray',
+  backButton: {
+    marginBottom: 16,
+  },
+  backButtonText: {
+    fontSize: 24,
+    color: "#000",
+  },
+  iconContainer: {
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  icon: {
+    fontSize: 32,
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    borderColor: "#ccc",
+    borderWidth: 1,
+  },
+  title: {
+    fontSize: 30,
+    fontWeight: "bold",
+    marginBottom: 24,
+    textAlign: "left",
   },
   input: {
+    height: 50,
+    borderColor: "#ccc",
     borderWidth: 1,
-    borderColor: 'gray',
-    padding: 10,
-    marginTop: 5,
-    marginBottom: 20,
-    backgroundColor: 'white',
-    borderRadius: 5,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    marginBottom: 16,
   },
-  textButton: {
-    alignSelf: 'center',
-    fontWeight: 'bold',
-    color: Colors.light.tint,
-    marginVertical: 10,
+  passwordInput: {
+    flex: 1,
+    color: "#fff",
+    paddingVertical: 10,
+    paddingRight: 10,
+    fontSize: 16,
   },
-});
+  switchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginVertical: 8,
+  },
+  switchText: {
+    fontSize: 12,
+    color: "gray",
+    marginBottom: 8,
+  },
+  button: {
+    backgroundColor: "#000",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginVertical: 16,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  footerText: {
+    textAlign: "center",
+    color: "gray",
+  },
+  loginLink: {
+    color: "#000",
+    fontWeight: "bold",
+  },
+})
 
-export default SignUpScreen;
+export default SignUpScreen
