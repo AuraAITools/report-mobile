@@ -8,12 +8,15 @@ import {
 } from "react-native"
 import { Icon } from "react-native-elements"
 import Spacer from "../Spacer"
+import { ViewStyle } from "react-native"
 
 interface PasswordInputProps {
-  placeholder?: string
-  title: string
   onValueChange: React.Dispatch<React.SetStateAction<string>>
   value: string
+  showTitle?: boolean
+  placeholder?: string
+  title?: string
+  containerStyle?: ViewStyle
 }
 
 const PasswordInput: React.FC<PasswordInputProps> = ({
@@ -21,6 +24,8 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
   placeholder,
   onValueChange,
   value,
+  showTitle = true,
+  containerStyle,
 }) => {
   const [showPassword, setShowPassword] = useState(false)
 
@@ -29,10 +34,14 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
   }
 
   return (
-    <View>
-      <Text>{title}</Text>
-      <Spacer height={4} />
-      <View style={styles.container}>
+    <View style={{ ...styles.container, ...containerStyle }}>
+      {showTitle ? (
+        <View>
+          <Text>{title}</Text>
+          <Spacer height={4} />
+        </View>
+      ) : null}
+      <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
           placeholder={placeholder || "placeholder"}
@@ -55,7 +64,8 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
 }
 
 const styles = StyleSheet.create({
-  container: {
+  container: { marginBottom: 8 },
+  inputContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -64,7 +74,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderColor: "#ccc",
     borderWidth: 1,
-    marginBottom: 8,
   },
   input: {
     flex: 1,

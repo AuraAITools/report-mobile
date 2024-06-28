@@ -1,4 +1,3 @@
-import { useState } from "react"
 import {
   View,
   TextInput,
@@ -7,14 +6,17 @@ import {
   StyleSheet,
 } from "react-native"
 import Spacer from "../Spacer"
+import { ViewStyle } from "react-native"
 
 interface GenericInputProps {
-  placeholder?: string
-  title: string
-  keyboardType?: KeyboardTypeOptions
-  autoCapitalise?: "none" | "sentences" | "words" | "characters" | undefined
   onValueChange: React.Dispatch<React.SetStateAction<string>>
   value: string
+  showTitle?: boolean
+  placeholder?: string
+  title?: string
+  keyboardType?: KeyboardTypeOptions
+  autoCapitalise?: "none" | "sentences" | "words" | "characters" | undefined
+  containerStyle?: ViewStyle
 }
 
 const GenericInput: React.FC<GenericInputProps> = ({
@@ -24,12 +26,18 @@ const GenericInput: React.FC<GenericInputProps> = ({
   autoCapitalise = "none",
   onValueChange,
   value,
+  showTitle = true,
+  containerStyle,
 }) => {
   return (
-    <View>
-      <Text>{title}</Text>
-      <Spacer height={4} />
-      <View style={styles.container}>
+    <View style={{ ...styles.container, ...containerStyle }}>
+      {showTitle ? (
+        <View>
+          <Text>{title}</Text>
+          <Spacer height={4} />
+        </View>
+      ) : null}
+      <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
           placeholder={placeholder}
@@ -43,7 +51,8 @@ const GenericInput: React.FC<GenericInputProps> = ({
   )
 }
 const styles = StyleSheet.create({
-  container: {
+  container: { marginBottom: 8 },
+  inputContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -52,7 +61,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderColor: "#ccc",
     borderWidth: 1,
-    marginBottom: 8,
   },
   input: {
     flex: 1,
