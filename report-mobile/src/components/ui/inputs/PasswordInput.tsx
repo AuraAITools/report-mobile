@@ -12,14 +12,16 @@ import Spacer from "../Spacer"
 interface PasswordInputProps {
   placeholder?: string
   title: string
+  onValueChange: React.Dispatch<React.SetStateAction<string>>
+  value: string
 }
 
 const PasswordInput: React.FC<PasswordInputProps> = ({
   title,
   placeholder,
+  onValueChange,
+  value,
 }) => {
-  const [password, setPassword] = useState("")
-
   const [showPassword, setShowPassword] = useState(false)
 
   const toggleShowPassword = () => {
@@ -34,8 +36,8 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
         <TextInput
           style={styles.input}
           placeholder={placeholder || "placeholder"}
-          value={password}
-          onChangeText={setPassword}
+          value={value}
+          onChangeText={onValueChange}
           secureTextEntry={!showPassword}
           autoCapitalize='none'
         ></TextInput>
@@ -68,7 +70,7 @@ const styles = StyleSheet.create({
     flex: 1,
     color: "#000",
     paddingVertical: 10,
-    paddingRight: 10,
+    paddingHorizontal: 5,
     fontSize: 16,
   },
   icon: {

@@ -1,4 +1,3 @@
-// src/screens/SignUpScreen.tsx
 import React, { useState } from "react"
 import {
   View,
@@ -13,18 +12,16 @@ import Spacer from "@/components/ui/Spacer"
 import Icon from "react-native-vector-icons/MaterialIcons"
 import PasswordInput from "@/components/ui/inputs/PasswordInput"
 import GenericInput from "@/components/ui/inputs/GenericInput"
+import CustomSwitch from "@/components/ui/CustomSwitch"
+import LinkButton from "@/components/ui/LinkButton"
+import { minWidth, constmaxWidth } from "@/constants/ScreenDimension"
 
 const SignUpScreen: React.FC = () => {
   const [email, setEmail] = useState("")
-  const [isPasswordShown, setIsPasswordShown] = useState(false)
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [getDailyReports, setGetDailyReports] = useState(false)
-  const [getweeklySummary, setGetWeeklySummary] = useState(true)
-
-  const toggleIsPasswordShown = () => {
-    setIsPasswordShown(!isPasswordShown)
-  }
+  const [getweeklySummary, setGetWeeklySummary] = useState(false)
 
   return (
     <View style={styles.container}>
@@ -36,33 +33,57 @@ const SignUpScreen: React.FC = () => {
         title='Email'
         placeholder='example@gmail.com'
         keyboardType={"email-address"}
+        onValueChange={setEmail}
+        value={email}
       />
       <Spacer height={8} />
       <PasswordInput
         title='Create a password'
         placeholder='must be 8 characters'
+        onValueChange={setPassword}
+        value={password}
       />
       <Spacer height={8} />
-      <PasswordInput title='Confirm password' placeholder='repeat password' />
+      <PasswordInput
+        title='Confirm password'
+        placeholder='repeat password'
+        onValueChange={setConfirmPassword}
+        value={confirmPassword}
+      />
       <View style={styles.switchContainer}>
-        <Text>Daily reports</Text>
-        <Switch value={getDailyReports} onValueChange={setGetDailyReports} />
+        <CustomSwitch
+          value={getDailyReports}
+          onValueChange={setGetDailyReports}
+        />
+        <View style={styles.switchTextContainer}>
+          <Text style={styles.switchTitle}>Daily reports</Text>
+          <Text style={styles.switchText}>
+            Get a daily activity report via email.
+          </Text>
+        </View>
       </View>
-      <Text style={styles.switchText}>
-        Get a daily activity report via email.
-      </Text>
       <View style={styles.switchContainer}>
-        <Text>Weekly summary</Text>
-        <Switch value={getweeklySummary} onValueChange={setGetWeeklySummary} />
+        <CustomSwitch
+          value={getweeklySummary}
+          onValueChange={setGetWeeklySummary}
+        />
+        <View style={styles.switchTextContainer}>
+          <Text style={styles.switchTitle}>Weekly summary</Text>
+          <Text style={styles.switchText}>
+            Get a weekly activity report via email.
+          </Text>
+        </View>
       </View>
-      <Text style={styles.switchText}>
-        Get a weekly activity report via email.
-      </Text>
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Log in</Text>
-      </TouchableOpacity>
+      <View style={styles.buttonContainer}>
+        <LinkButton
+          href='/login'
+          label='Log in'
+          buttonStyle={styles.button}
+          textStyle={styles.buttonText}
+        />
+      </View>
       <Text style={styles.footerText}>
-        Already have an account?{" "}
+        {"Already have an account? "}
         <Link href='/login' style={styles.loginLink}>
           Log in
         </Link>
@@ -77,29 +98,12 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: "#fff",
   },
-  backButton: {
-    marginBottom: 16,
-  },
-  backButtonText: {
-    fontSize: 24,
-    color: "#000",
-  },
   iconContainer: {
     alignItems: "center",
     marginBottom: 16,
   },
   icon: {
     fontSize: 32,
-  },
-  passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    borderColor: "#ccc",
-    borderWidth: 1,
   },
   title: {
     fontSize: 30,
@@ -115,36 +119,40 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     marginBottom: 16,
   },
-  passwordInput: {
-    flex: 1,
-    color: "#fff",
-    paddingVertical: 10,
-    paddingRight: 10,
-    fontSize: 16,
-  },
   switchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginVertical: 8,
+    marginTop: 18,
+  },
+  switchTextContainer: {
+    marginLeft: 12,
+  },
+  switchTitle: {
+    fontWeight: "600",
+    fontSize: 16,
   },
   switchText: {
-    fontSize: 12,
+    fontSize: 14,
     color: "gray",
-    marginBottom: 8,
+  },
+  buttonContainer: {
+    alignItems: "center",
+    marginTop: 30,
   },
   button: {
     backgroundColor: "#000",
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: "center",
-    marginVertical: 16,
+    minWidth: minWidth,
+    maxWidth: constmaxWidth,
   },
   buttonText: {
     color: "#fff",
     fontSize: 16,
   },
   footerText: {
+    marginTop: 24,
     textAlign: "center",
     color: "gray",
   },

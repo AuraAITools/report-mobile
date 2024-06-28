@@ -13,6 +13,8 @@ interface GenericInputProps {
   title: string
   keyboardType?: KeyboardTypeOptions
   autoCapitalise?: "none" | "sentences" | "words" | "characters" | undefined
+  onValueChange: React.Dispatch<React.SetStateAction<string>>
+  value: string
 }
 
 const GenericInput: React.FC<GenericInputProps> = ({
@@ -20,9 +22,9 @@ const GenericInput: React.FC<GenericInputProps> = ({
   placeholder,
   keyboardType,
   autoCapitalise = "none",
+  onValueChange,
+  value,
 }) => {
-  const [textValue, setTextValue] = useState("")
-
   return (
     <View>
       <Text>{title}</Text>
@@ -31,8 +33,8 @@ const GenericInput: React.FC<GenericInputProps> = ({
         <TextInput
           style={styles.input}
           placeholder={placeholder}
-          value={textValue}
-          onChangeText={setTextValue}
+          value={value}
+          onChangeText={onValueChange}
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalise}
         />
@@ -56,7 +58,7 @@ const styles = StyleSheet.create({
     flex: 1,
     color: "#000",
     paddingVertical: 10,
-    paddingRight: 10,
+    paddingHorizontal: 5,
     fontSize: 16,
   },
   icon: {
