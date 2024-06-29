@@ -57,14 +57,14 @@ const SignInScreen: React.FC = () => {
         </View>
         <View style={styles.linksContainer}>
           <LinkButton
-            href='/forgotpassword'
+            href='/forgot-password'
             label='I forgot my password'
             buttonStyle={styles.linkWrapper}
             textStyle={styles.linkText}
           />
           <Divider isVertical={true} />
           <LinkButton
-            href='/forgotpassword'
+            href='/other-problem'
             label='Other problems'
             buttonStyle={styles.linkWrapper}
             textStyle={styles.linkText}
