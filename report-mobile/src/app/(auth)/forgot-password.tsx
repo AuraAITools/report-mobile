@@ -1,20 +1,26 @@
 import React, { useState } from "react"
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native"
-import { useNavigation } from "@react-navigation/native"
-import Icon from "react-native-vector-icons/Ionicons"
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native"
 import GenericInput from "@/components/ui/inputs/GenericInput"
+import { useRouter } from "expo-router"
 
 const ForgotPasswordScreen: React.FC = () => {
   const [email, setEmail] = useState("")
+  const router = useRouter()
 
-  const handlePasswordReset = () => {
-    //TODO: Handle password reset logic here
+  const handlePasswordReset = async () => {
+    try {
+      const status = 200
+      if (status === 200) {
+        Alert.alert("Success", "Password reset successfully!", [
+          { text: "OK", onPress: () => router.push("/reset-password") },
+        ])
+      } else {
+        Alert.alert("Error", "Failed to reset password. Please try again.")
+      }
+    } catch (error) {
+      Alert.alert("Error", "An error occurred. Please try again.")
+      console.error(error)
+    }
   }
 
   return (

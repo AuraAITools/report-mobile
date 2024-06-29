@@ -6,10 +6,12 @@ import {
   TextStyle,
 } from "react-native"
 import { Link, Href } from "expo-router"
+import { GestureResponderEvent } from "react-native"
 
 interface LinkButtonProps {
   href: string
   label: string
+  onPress?: (event: GestureResponderEvent) => void
   buttonStyle?: ViewStyle
   textStyle?: TextStyle
   linkStyle?: ViewStyle
