@@ -64,7 +64,7 @@ const SignInScreen: React.FC = () => {
           />
           <Divider isVertical={true} />
           <LinkButton
-            href='/forgotpassword'
+            href='/other-problem'
             label='Other problems'
             buttonStyle={styles.linkWrapper}
             textStyle={styles.linkText}
