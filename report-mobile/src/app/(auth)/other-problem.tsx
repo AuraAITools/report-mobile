@@ -1,7 +1,5 @@
-import React from "react"
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native"
-import { useNavigation } from "@react-navigation/native"
-import Icon from "react-native-vector-icons/Ionicons"
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
 
 const OtherProblemScreen: React.FC = () => {
   return (
@@ -19,8 +17,8 @@ const OtherProblemScreen: React.FC = () => {
         <Text style={styles.email}>hello@auralearning.com</Text>
       </Text>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -45,6 +43,6 @@ const styles = StyleSheet.create({
     color: "#000",
     fontWeight: "bold",
   },
-})
+});
 
-export default OtherProblemScreen
+export default OtherProblemScreen;
