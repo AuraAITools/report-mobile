@@ -1,9 +1,8 @@
-import React from "react"
-import { View, Text, StyleSheet, Button } from "react-native"
-import { useRouter } from "expo-router"
-import LinkButton from "@/components/ui/LinkButton"
-import { constmaxWidth, minWidth } from "@/constants/ScreenDimension"
-import Spacer from "@/components/ui/Spacer"
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import LinkButton from "@/components/ui/LinkButton";
+import { constmaxWidth, minWidth } from "@/constants/ScreenDimension";
+import Spacer from "@/components/ui/Spacer";
 
 const SplashScreen: React.FC = () => {
   return (
@@ -12,22 +11,22 @@ const SplashScreen: React.FC = () => {
       <Text style={styles.subtitle}>Start using Aura Learning</Text>
       <View>
         <LinkButton
-          href='/sign-in'
-          label='Sign In'
+          href="/sign-in"
+          label="Sign In"
           buttonStyle={styles.signInButton}
           textStyle={styles.signInButtonText}
         />
         <Spacer />
         <LinkButton
-          href='/sign-up'
-          label='Continue Registration'
+          href="/sign-up"
+          label="Continue Registration"
           buttonStyle={styles.signUpButton}
           textStyle={styles.signUpButtonText}
         />
       </View>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -77,6 +76,6 @@ const styles = StyleSheet.create({
     color: "#000",
     fontWeight: "600",
   },
-})
+});
 
-export default SplashScreen
+export default SplashScreen;
