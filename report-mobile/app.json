@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "report-mobile",
-    "slug": "report-mobile",
+    "name": "aura report",
+    "slug": "aura-report",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -16,7 +16,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aura.report"
     },
     "android": {
       "adaptiveIcon": {
