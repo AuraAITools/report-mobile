@@ -4,7 +4,6 @@ import { institutionsData } from '@assets/data/Institutions'
 import CardList from '@/components/ui/CardList'
 import { Institution } from '@/types/models/Institution'
 import { useAuth } from '@/providers/AuthProvider'
-import Account from '@/components/ui/Account'
 
 export default function InstitutionsScreen() {
   const {session} = useAuth();
@@ -12,7 +11,7 @@ export default function InstitutionsScreen() {
     <View>
       <CardList data={convertInstitutionsDataToCardList(institutionsData)} />
       <View>
-        {session && session.user ? <Account key={session.user.id} session={session}/>:<Text>Fail</Text>}
+        {/* {session && session.user ? <Account key={session.user.id} session={session}/>:<Text>Fail</Text>} */}
       </View>
     </View>
   )
