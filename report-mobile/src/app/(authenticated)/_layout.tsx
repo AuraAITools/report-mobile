@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react'
-import { Href, Redirect, Stack, useRouter } from 'expo-router'
+import { Redirect, Stack, useRouter } from 'expo-router'
 import Dropdown from '@/components/ui/Dropdown'
-import { supabase } from '@/lib/supabase'
 import { NativeStackNavigationOptions } from "@react-navigation/native-stack"
 import { useAuth } from '@/providers/AuthProvider'
 import { Button, View } from 'react-native'
@@ -13,17 +12,17 @@ const AuthenticatedLayout = () => {
   // if user is authenticated redirect to accounts screen
   useEffect(() => {
     if (!loading && session) {
-      router.replace(`(accounts)/${session.user.id}` as Href<string>)
+      // router.replace(`(accounts)/${session.user.id}` as Href<string>)
     }
   }, [session, loading])
 
   async function signOut() {
     console.log('signing out')
-    const { error } = await supabase.auth.signOut();
-    if (error) {
+    // const { error } = await supabase.auth.signOut();
+    // if (error) {
       //TODO: include a error toast in the future
-      console.log(error.message);
-    }
+      // console.log(error.message);
+    // }
   }
 
   const headerOptions = (

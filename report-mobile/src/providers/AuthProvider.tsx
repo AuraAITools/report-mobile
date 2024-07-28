@@ -5,10 +5,19 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { supabase } from "@/lib/supabase";
-import { Session } from "@supabase/supabase-js";
 import { AppState } from "react-native";
-import { Href, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
+import { AuraSecureStore } from "@/lib/secure-store";
+import { KeycloakClient } from "@/lib/keycloak/keycloak-client";
+import { keycloakClientConfig } from "@/configs/keycloakClientConfig";
+import { KeycloakAuthManager } from "@/lib/keycloak/keycloak-auth-manager";
+
+export type Session = {};
+
+export const keycloakAuthManager = KeycloakAuthManager.getInstance(
+  AuraSecureStore.getInstance(),
+  new KeycloakClient(keycloakClientConfig)
+);
 
 type AuthData = {
   session: Session | null;
@@ -21,14 +30,11 @@ const AuthContext = createContext<AuthData>({
   loading: true,
 });
 
-// whenever screen becomes active, exchange AT & RT for a new pair
 AppState.addEventListener("change", (state) => {
   console.log(`event: ${state} fired`);
 
   if (state === "active") {
-    supabase.auth.startAutoRefresh();
-  } else {
-    supabase.auth.stopAutoRefresh();
+    // TODO: add refresh
   }
 });
 
@@ -38,27 +44,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
   const router = useRouter();
 
   useEffect(() => {
-    // register listener on AuthProvider mount to listen to state changes
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log(`auth event: ${event}`);
-        setSession(session);
-        setLoading(false);
 
-        if (event === "SIGNED_IN") {
-          router.replace(
-            `/(authenticated)/(accounts)/${session?.user.id}` as Href<String>
-          );
-        } else if (event === "SIGNED_OUT") {
-          router.replace("/");
-        }
-      }
-    );
-
-    // clean up auth listener on AuthProvider dismount
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
   }, []);
 
   return (
