@@ -1,6 +1,9 @@
-declare module '@env' {
-    export const EXPO_PUBLIC_SUPABASE_URL: string;
-    export const EXPO_PUBLIC_SUPABASE_ANON: string;
-    export const EXPO_PUBLIC_GOOGLE_CLIENT_ID: string;
-    export const REPORT_MS_API_URL: string;
+declare module "@env" {
+  export const REPORT_MS_API_URL: string;
+
+  // keycloak 
+  export const KEYCLOAK_URL: string;
+  export const KEYCLOAK_CLIENT_ID: string;
+  export const KEYCLOAK_CLIENT_SECRET: string;
+  export const KEYCLOAK_REALM: string;
 }
