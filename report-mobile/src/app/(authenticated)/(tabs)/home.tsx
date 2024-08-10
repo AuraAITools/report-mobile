@@ -1,4 +1,7 @@
+import { Subject, SubjectLesson } from "@/types/models/Subject"
+import { formatTimestampToDateString } from "@/util/DateTimeUtil"
 import React, { useEffect, useState } from "react"
+import { Dimensions } from "react-native"
 import {
   View,
   Text,
@@ -7,24 +10,17 @@ import {
   ScrollView,
   Image,
 } from "react-native"
-import { FontAwesome } from "@expo/vector-icons"
 
-type Subject = {
-  name: string
-  lessons: SubjectLesson[]
-}
-
-type SubjectLesson = {
-  name: string
-  date: string
-}
+const { width, height } = Dimensions.get("window")
 
 const HomeScreen = () => {
   const [studentName, setStudentName] = useState<string>("")
   const [tuitionCenter, setTuitionCenter] = useState<string>("")
   const [studentSubjects, setStudentSubjects] = useState<Subject[]>([])
   const [selectedSubject, setSelectedSubject] = useState<string>("")
-  const [subjectLessons, setSubjectLessons] = useState<SubjectLesson[]>([])
+  const [upcomingSubjectLesson, setUpcomingSubjectLessons] = useState<
+    SubjectLesson[]
+  >([])
 
   useEffect(() => {
     // TODO: HTTP request
@@ -32,24 +28,40 @@ const HomeScreen = () => {
     setTuitionCenter("AGrader Tuition Center (AMK)")
     const subjects: Subject[] = [
       {
+        id: "1",
         name: "P5 Science",
         lessons: [
-          { name: "Respiratory System 1", date: "3 April 2024, 01:15 PM" },
-          { name: "Respiratory System 1", date: "3 April 2024, 01:15 PM" },
+          { id: "1", name: "Respiratory System 2", timestamp: 1672541199000 },
+          { id: "2", name: "Respiratory System 1", timestamp: 1672531199000 },
+          { id: "3", name: "Respiratory System 3", timestamp: 1672561199000 },
         ],
       },
       {
+        id: "2",
         name: "P5 Chinese",
-        lessons: [{ name: "Chinese Lesson 1", date: "4 April 2024, 02:15 PM" }],
+        lessons: [
+          { id: "1", name: "Chinese Lesson 1", timestamp: 1672531199000 },
+        ],
       },
       {
+        id: "3",
         name: "P5 Math",
-        lessons: [{ name: "Math Lesson 1", date: "5 April 2024, 03:15 PM" }],
+        lessons: [{ id: "1", name: "Math Lesson 1", timestamp: 1672531199000 }],
+      },
+      {
+        id: "4",
+        name: "P5 Music",
+        lessons: [{ id: "1", name: "Music Lesson 1", timestamp: 167253119900 }],
+      },
+      {
+        id: "5",
+        name: "P5 Art",
+        lessons: [{ id: "1", name: "Art Lesson 1", timestamp: 1672531199000 }],
       },
     ]
     setStudentSubjects(subjects)
     setSelectedSubject(subjects.length > 0 ? subjects[0].name : "")
-    setSubjectLessons(subjects.length > 0 ? subjects[0].lessons : [])
+    setUpcomingSubjectLessons(subjects.length > 0 ? subjects[0].lessons : [])
   }, [])
 
   const handleStudentSwitch = () => {
@@ -86,19 +98,27 @@ const HomeScreen = () => {
     console.log("handle lesson on press")
   }
 
-  const studentLessonItems = subjectLessons.map((lesson, idx) => (
-    <View style={styles.lessonCard}>
-      <Text style={styles.lessonTitle}>test</Text>
-      <Text style={styles.lessonName}>{lesson.name}</Text>
-      <Text style={styles.lessonDate}>{lesson.date}</Text>
-      <TouchableOpacity
-        style={styles.lessonButton}
-        onPress={handleLessonOnPress}
-      >
-        <Text style={styles.lessonButtonText}>something</Text>
-      </TouchableOpacity>
-    </View>
-  ))
+  const studentLessonItems = upcomingSubjectLesson
+    .sort(
+      (currLesson, nextLesson) => currLesson.timestamp - nextLesson.timestamp
+    )
+    .map((lesson, idx) => (
+      <View key={idx} style={styles.lessonCard}>
+        <Text style={styles.lessonTitle}>
+          {idx === 0 ? "Most recent class" : "Upcoming class"}
+        </Text>
+        <Text style={styles.lessonName}>{lesson.name}</Text>
+        <Text style={styles.lessonDate}>
+          {formatTimestampToDateString(lesson.timestamp)}
+        </Text>
+        <TouchableOpacity
+          style={styles.lessonButton}
+          onPress={handleLessonOnPress}
+        >
+          <Text style={styles.lessonButtonText}>something</Text>
+        </TouchableOpacity>
+      </View>
+    ))
 
   return (
     <ScrollView style={styles.container}>
@@ -112,7 +132,13 @@ const HomeScreen = () => {
         <Text style={styles.center}>{tuitionCenter}</Text>
       </View>
 
-      <View style={styles.subjects}>{studentSubjectItems}</View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.subjects}
+      >
+        {studentSubjectItems}
+      </ScrollView>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Lessons</Text>
@@ -121,7 +147,13 @@ const HomeScreen = () => {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.lessons}>{studentLessonItems}</View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.lessons}
+      >
+        {studentLessonItems}
+      </ScrollView>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Announcements</Text>
@@ -141,7 +173,7 @@ const HomeScreen = () => {
       <View style={styles.registrationCard}>
         <Image
           style={styles.registrationImage}
-          source={{ uri: "https://your-image-url" }}
+          source={{ uri: "https://something-here" }}
         />
         <Text style={styles.registrationText}>
           Registration for Academic Year 2024 Starts Now!
@@ -157,7 +189,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   header: {
-    padding: 16,
+    padding: height * 0.02,
   },
   headerTextContainer: {
     flexDirection: "row",
@@ -165,31 +197,34 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   name: {
-    fontSize: 24,
+    fontSize: width * 0.06,
     fontWeight: "bold",
   },
   switch: {
     color: "grey",
   },
   center: {
-    fontSize: 16,
+    marginTop: height * 0.01,
+    fontSize: width * 0.04,
     color: "gray",
   },
   subjects: {
-    flexDirection: "row",
-    justifyContent: "space-around",
+    marginBottom: height * 0.01,
+    paddingLeft: width * 0.04,
   },
   subjectButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingVertical: height * 0.01,
+    paddingHorizontal: width * 0.04,
     backgroundColor: "#f0f0f0",
-    borderRadius: 16,
+    borderRadius: width * 0.06,
+    marginRight: width * 0.03,
   },
   subjectButtonSelected: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingVertical: height * 0.01,
+    paddingHorizontal: width * 0.04,
     backgroundColor: "#ff6347",
-    borderRadius: 16,
+    borderRadius: width * 0.06,
+    marginRight: width * 0.03,
   },
   subjectText: {
     color: "black",
@@ -201,50 +236,48 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
-    marginVertical: 8,
+    paddingHorizontal: width * 0.04,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: width * 0.05,
+    fontWeight: "800",
   },
   seeAll: {
     color: "grey",
   },
   lessons: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    columnGap: 12,
-    marginHorizontal: 16,
+    marginVertical: height * 0.015,
+    paddingLeft: width * 0.04,
   },
   lessonCard: {
-    backgroundColor: "#005B9A",
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
+    backgroundColor: "#F5F5F5",
+    padding: height * 0.02,
+    borderRadius: width * 0.02,
+    marginBottom: height * 0.01,
+    marginRight: width * 0.03,
   },
   lessonTitle: {
-    fontSize: 14,
-    color: "white",
-    marginBottom: 4,
+    fontSize: width * 0.035,
+    color: "",
+    marginBottom: height * 0.005,
   },
   lessonName: {
-    fontSize: 18,
+    fontSize: width * 0.045,
     fontWeight: "bold",
     color: "white",
-    marginBottom: 8,
+    marginBottom: height * 0.01,
   },
   lessonDate: {
-    fontSize: 14,
+    fontSize: width * 0.035,
     color: "white",
-    marginBottom: 16,
+    marginBottom: height * 0.02,
   },
   lessonButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingVertical: height * 0.01,
+    paddingHorizontal: width * 0.04,
     borderColor: "white",
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: width * 0.02,
   },
   lessonButtonText: {
     color: "white",
@@ -255,38 +288,40 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   announcementCard: {
-    margin: 16,
-    padding: 16,
-    borderRadius: 8,
+    marginHorizontal: width * 0.04,
+    marginVertical: height * 0.015,
+    padding: height * 0.02,
+    borderRadius: width * 0.02,
     backgroundColor: "#FFF16F",
   },
   announcementTitle: {
-    fontSize: 14,
+    fontSize: width * 0.035,
     fontWeight: "bold",
     color: "black",
   },
   announcementDays: {
-    fontSize: 24,
+    fontSize: width * 0.06,
     fontWeight: "bold",
-    marginVertical: 4,
+    marginVertical: height * 0.005,
   },
   announcementText: {
-    fontSize: 14,
+    fontSize: width * 0.035,
     color: "black",
   },
   registrationCard: {
-    margin: 16,
-    padding: 16,
-    borderRadius: 8,
+    marginHorizontal: width * 0.04,
+    marginBottom: height * 0.015,
+    padding: height * 0.02,
+    borderRadius: width * 0.02,
     backgroundColor: "#f0f0f0",
   },
   registrationImage: {
     width: "100%",
-    height: 100,
-    marginBottom: 8,
+    height: height * 0.125,
+    marginBottom: height * 0.01,
   },
   registrationText: {
-    fontSize: 14,
+    fontSize: width * 0.035,
     color: "black",
   },
 })
