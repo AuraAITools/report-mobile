@@ -1,38 +1,108 @@
 import {
   KeycloakClientLogoutError,
-  KeycloakTokenRefreshError,
 } from "@/types/keycloak/errors";
 import { ISecureStore } from "../secure-store";
 import { IAuthClient, UserSignUpInfo } from "./keycloak-client";
+import {
+  AuthEventHandler,
+  AuthEventPublisher,
+} from "@/types/keycloak/auth-event-publisher";
+import { convertTokensToSession, ISession } from "@/types/keycloak/session";
+import { decodeRefreshToken } from "@/types/keycloak/tokens";
+
 interface IAuthManager {
   loginUser(username: string, password: string): Promise<void>;
   logoutUserSession(): Promise<void>;
-  refreshSession(): Promise<void>;
+  refreshSession(): Promise<boolean>;
   signupUser(userSignUpInfo: UserSignUpInfo): Promise<void>;
 }
 
 /**
- * KeycloakAuthManager manages authentication by using SecureStorage and
- * the Authorisation client
+ * KeycloakAuthManager manages authentication by using SecureStorage,
+ * Authorisation client and the AuthEventPublisher
  */
 export class KeycloakAuthManager implements IAuthManager {
   private static _instance: KeycloakAuthManager;
   private secureStorage: ISecureStore;
   private authClient: IAuthClient;
-  protected static REFRESH_TOKEN_SECURE_STORAGE_KEY = "refresh_token";
-  protected static ACCESS_TOKEN_SECURE_STORAGE_KEY = "access_token";
+  private authEventPublisher: AuthEventPublisher;
+  public session: UserSession;
 
-  private constructor(secureStorage: ISecureStore, authClient: IAuthClient) {
+  private constructor(
+    secureStorage: ISecureStore,
+    authClient: IAuthClient,
+    authEventPublisher: AuthEventPublisher
+  ) {
     this.secureStorage = secureStorage;
     this.authClient = authClient;
+    this.authEventPublisher = authEventPublisher;
+    // load initial user session from secure store
+    this.session = null;
   }
 
-  public static getInstance(secureStorage: ISecureStore, authClient: IAuthClient) {
-    if (!KeycloakAuthManager._instance){
-      this._instance = new KeycloakAuthManager(secureStorage,authClient);
+  /**
+   * Singleton KeycloakAuthManager
+   * @param secureStorage
+   * @param authClient
+   * @param authEventPublisher
+   * @returns
+   */
+  public static getInstance(
+    secureStorage: ISecureStore,
+    authClient: IAuthClient,
+    authEventPublisher: AuthEventPublisher
+  ) {
+    if (!this._instance) {
+      this._instance = new this(
+        secureStorage,
+        authClient,
+        authEventPublisher
+      );
+      console.debug("creating new singleton auth manager")
     }
-    return KeycloakAuthManager._instance;
+    return this._instance;
   }
+
+  /**
+   * registers an auth event handler
+   *
+   * @param callback
+   */
+  public onEvent(callback: AuthEventHandler) {
+    this.authEventPublisher.subscribe(callback);
+  }
+
+  /**
+   * loads UserSession in storage into memory
+   * if no session, cleanly clears secure storage for any session information
+   * if session is available, updates session memory
+   *
+   */
+  public async loadUserSessionFromStorageAndLogin() {
+    let accessToken = await this.secureStorage.getValueFor("access_token");
+    let refreshToken = await this.secureStorage.getValueFor("refresh_token");
+
+    console.debug(`loaded from storage: access token ${accessToken}`)
+    console.debug(`loaded from storage: refresh token ${refreshToken}`)
+
+    if (!accessToken || !refreshToken) {
+      this._clearInMemorySession();
+      this._removeSessionFromStorage();
+      this.authEventPublisher.publishEvent("SIGNED_OUT");
+      return;
+    }
+
+    // loads session to memory
+    this.session = convertTokensToSession(accessToken, refreshToken);
+    console.debug(`AuthManager: loaded stored session to memory: \n ${JSON.stringify(this.session)}`)
+    
+    // attempts to refresh user session
+    let refreshed = await this.refreshSession()
+    if (refreshed) {
+      this.authEventPublisher.publishEvent("SIGNED_IN")
+    }
+  }
+
   /**
    * logs in user and starts user session
    *
@@ -42,15 +112,32 @@ export class KeycloakAuthManager implements IAuthManager {
    * @throws {KeycloakUserLoginFailedError}
    */
   async loginUser(username: string, password: string): Promise<void> {
-    let response = await this.authClient.loginUser(username, password);
-    this.secureStorage.save(
-      KeycloakAuthManager.ACCESS_TOKEN_SECURE_STORAGE_KEY,
-      response.access_token
-    );
-    this.secureStorage.save(
-      KeycloakAuthManager.REFRESH_TOKEN_SECURE_STORAGE_KEY,
-      response.refresh_token!
-    );
+
+    // login error is thrown here if login fails
+    let response;
+    try {
+      response = await this.authClient.loginUser(username, password);
+    } catch (error) {
+      console.error(error);
+      return;
+    }
+
+    try {
+      this.session = convertTokensToSession(
+        response.access_token,
+        response.refresh_token
+      );  
+      console.log(`session ${JSON.stringify(this.session)}`)
+    } catch (error) {
+      console.error("Failed to convert tokens to session:", error);
+      return;
+    }
+    // update in-memory user session
+
+    this.authEventPublisher.publishEvent("SIGNED_IN");
+
+    // store session in secure storage
+    await this._storeUserSessionInStorage(this.session);
   }
 
   /**
@@ -60,21 +147,15 @@ export class KeycloakAuthManager implements IAuthManager {
    * @throws {KeycloakClientLogoutError}
    */
   async logoutUserSession(): Promise<void> {
-    const refreshToken = await this.secureStorage.getValueFor(
-      KeycloakAuthManager.REFRESH_TOKEN_SECURE_STORAGE_KEY
-    );
+    const refreshToken = await this.secureStorage.getValueFor("refresh_token");
 
     if (!refreshToken) {
       throw new KeycloakClientLogoutError(`failed to retrieve refresh_token`);
     }
 
     await this.authClient.logoutUser(refreshToken);
-    this.secureStorage.deleteItemFor(
-      KeycloakAuthManager.ACCESS_TOKEN_SECURE_STORAGE_KEY
-    );
-    this.secureStorage.deleteItemFor(
-      KeycloakAuthManager.REFRESH_TOKEN_SECURE_STORAGE_KEY
-    );
+    this._clearInMemorySession();
+    await this._removeSessionFromStorage();
   }
 
   /**
@@ -83,16 +164,39 @@ export class KeycloakAuthManager implements IAuthManager {
    * @returns {Promise<void>}
    * @throws {KeycloakTokenRefreshError}
    */
-  async refreshSession(): Promise<void> {
-    const refreshToken = await this.secureStorage.getValueFor(
-      KeycloakAuthManager.ACCESS_TOKEN_SECURE_STORAGE_KEY
-    );
-    if (!refreshToken) {
-      throw new KeycloakTokenRefreshError(`failed to retrieve refresh_token`);
+  async refreshSession(): Promise<boolean> {
+    // user was already signed out
+    if (!this.session) {
+      this.authEventPublisher.publishEvent("SIGNED_OUT");
+      return false;
     }
-    const res = await this.authClient.refreshUserToken(refreshToken);
-    this.secureStorage.save(KeycloakAuthManager.ACCESS_TOKEN_SECURE_STORAGE_KEY, res.access_token)
-    this.secureStorage.save(KeycloakAuthManager.REFRESH_TOKEN_SECURE_STORAGE_KEY, res.refresh_token!)
+
+    let refreshToken = decodeRefreshToken(this.session.refresh_token);
+
+    // could not decode refresh_token
+    if (!refreshToken) {
+      this.authEventPublisher.publishEvent("SIGNED_OUT");
+      return false;
+    }
+
+    // user's refresh token has expired
+    if (refreshToken.exp <= Date.now()) {
+      this._clearInMemorySession();
+      await this._removeSessionFromStorage();
+      this.authEventPublisher.publishEvent("SIGNED_OUT");
+      return false;
+    }
+
+    const response = await this.authClient.refreshUserToken(
+      this.session.refresh_token
+    );
+    this.session = convertTokensToSession(
+      response.access_token,
+      response.refresh_token
+    );
+    this.authEventPublisher.publishEvent("SESSION_REFRESHED");
+    this._storeUserSessionInStorage(this.session);
+    return true;
   }
 
   /**
@@ -103,9 +207,45 @@ export class KeycloakAuthManager implements IAuthManager {
    */
   async signupUser(userSignUpInfo: UserSignUpInfo): Promise<void> {
     await this.authClient.signupUser(userSignUpInfo);
-    return this.loginUser(
+    this.authEventPublisher.publishEvent("SIGNED_UP");
+
+    let response = await this.authClient.loginUser(
       userSignUpInfo.email,
       userSignUpInfo.credentials[0].value
     );
+    this.authEventPublisher.publishEvent("SIGNED_IN");
+    this.session = convertTokensToSession(
+      response.access_token,
+      response.refresh_token
+    );
+
+    this._storeUserSessionInStorage(this.session);
+  }
+
+  private _clearInMemorySession() {
+    this.session = null;
+  }
+
+  private async _removeSessionFromStorage() {
+    await this.secureStorage.deleteItemFor("user");
+    await this.secureStorage.deleteItemFor("access_token");
+    await this.secureStorage.deleteItemFor("refresh_token");
+  }
+
+  /**
+   * stores userSession in storage. This allows loading of UserSession after
+   * app has been closed
+   *
+   * @param userSession
+   */
+  private async _storeUserSessionInStorage(userSession: UserSession) {
+    // persist user session to storage
+    let task1 = this.secureStorage.save("access_token", userSession!.access_token);
+    let task2 =this.secureStorage.save("refresh_token", userSession!.refresh_token);
+    let task3 =this.secureStorage.save("user", JSON.stringify(userSession!.user));
+    await Promise.allSettled([task1,task2,task3])
+    console.debug("stored user session in secure storage successfully")
   }
 }
+
+type UserSession = ISession | null;

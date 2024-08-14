@@ -27,3 +27,9 @@ export class KeycloakClientLogoutError extends Error {
     super(message);
   }
 }
+
+export class DecodeTokenError extends Error {
+  constructor(message: string) {
+    super(message);
+  }
+}

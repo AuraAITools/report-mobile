@@ -1,5 +1,5 @@
 import axios from "axios";
-import { KeycloakAuthResponse } from "@/types/keycloak/KeycloakAuthResponse";
+import { KeycloakAuthResponse } from "@/types/keycloak/auth-response";
 import { KeycloakClientFetchClientAccessTokenError, KeycloakClientLogoutError, KeycloakClientSignUpError, KeycloakTokenRefreshError, KeycloakUserLoginFailedError } from "@/types/keycloak/errors";
 
 export type KeycloakClientConfig = {
@@ -68,7 +68,7 @@ export class KeycloakClient implements IAuthClient {
     password: string
   ): Promise<KeycloakAuthResponse> {
     console.log("logging in user ...");
-    return this._loginUser(username, password);
+    return await this._loginUser(username, password);
   }
 
   /**
@@ -213,23 +213,22 @@ export class KeycloakClient implements IAuthClient {
       password: password,
     };
 
-    // const options = {
-    //   headers: {
-    //     "Content-Type": "application/x-www-form-urlencoded",
-    //   },
-    // };
+    const options = {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    };
 
     let response;
     try {
+      console.debug(`#_loginUser():sending request to login ...`)
       response = await axios.post<KeycloakAuthResponse>(
         this.tokenEndpoint.toString(),
         data,
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          }
-        }
+        options
       );
+     
+      console.debug(`keycloak login response: \n ${JSON.stringify(response)}`)
     } catch (error) {
       console.error(`_loginUser: axios failed to log in user`);
       throw new KeycloakUserLoginFailedError(`Failed to login user`);
@@ -238,6 +237,7 @@ export class KeycloakClient implements IAuthClient {
     if (response.status !== 200) {
       throw new KeycloakUserLoginFailedError(`Failed to login user`);
     }
+
     return response.data;
   }
 
@@ -298,7 +298,7 @@ export class KeycloakClient implements IAuthClient {
     const headers = {
       "Content-Type": "application/x-www-form-urlencoded",
     };
-
+    console.log(`data: ${JSON.stringify(data)}`)
     try {
       const authResponse = await axios.post<KeycloakAuthResponse>(
         this.tokenEndpoint.toString(),
@@ -309,7 +309,7 @@ export class KeycloakClient implements IAuthClient {
       return authResponse.data;
     } catch (error) {
       console.error(
-        `_refreshTokenFromSecureStorage: axios failed to fetch refresh token`
+        `_refreshUserToken: axios failed to fetch refresh token`
       );
       throw new KeycloakTokenRefreshError(`Token refresh failed`);
     }
