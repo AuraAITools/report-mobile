@@ -13,3 +13,9 @@ export const formatTimestampToDateString = (timestamp: number): string => {
 
   return `${day} ${month} ${year}, ${hours12}:${minutes} ${ampm}`
 }
+
+// Outputs difference in number of days using timestamp
+export const getDayDifference = (timestamp: number): number => {
+  const timestampDiff = Math.abs(timestamp - Date.now())
+  return Math.round(timestampDiff / (1000 * 60 * 60 * 24))
+}
