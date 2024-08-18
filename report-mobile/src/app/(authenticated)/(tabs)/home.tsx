@@ -1,15 +1,11 @@
-import { Subject, SubjectLesson } from "@/types/models/Subject"
-import { formatTimestampToDateString } from "@/util/DateTimeUtil"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { Dimensions } from "react-native"
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Image,
-} from "react-native"
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from "react-native"
+import LessonCard from "@/components/ui/LessonCard"
+import { Exam } from "@/types/models/Exam"
+import { Subject, SubjectLesson } from "@/types/models/Subject"
+import { getDayDifference } from "@/util/DateTimeUtil"
+import { binarySearchUpperBound } from "@/util/Utils"
 
 const { width, height } = Dimensions.get("window")
 
@@ -18,30 +14,28 @@ const HomeScreen = () => {
   const [tuitionCenter, setTuitionCenter] = useState<string>("")
   const [studentSubjects, setStudentSubjects] = useState<Subject[]>([])
   const [selectedSubject, setSelectedSubject] = useState<string>("")
-  const [upcomingSubjectLesson, setUpcomingSubjectLessons] = useState<
-    SubjectLesson[]
-  >([])
+  const [subjectLesson, setSubjectLesson] = useState<SubjectLesson[]>([])
+  const [nextExam, setNextExam] = useState<Exam>()
 
   useEffect(() => {
-    // TODO: HTTP request
+    // Initial data fetch or setup
     setStudentName("Eugene Lee")
     setTuitionCenter("AGrader Tuition Center (AMK)")
+
     const subjects: Subject[] = [
       {
         id: "1",
         name: "P5 Science",
         lessons: [
-          { id: "1", name: "Respiratory System 2", timestamp: 1672541199000 },
-          { id: "2", name: "Respiratory System 1", timestamp: 1672531199000 },
-          { id: "3", name: "Respiratory System 3", timestamp: 1672561199000 },
+          { id: "1", name: "Respiratory System 2", timestamp: 1672541199001 },
+          { id: "2", name: "Respiratory System 1", timestamp: 1672531199005 },
+          { id: "3", name: "Respiratory System 3", timestamp: 1672561199010 },
         ],
       },
       {
         id: "2",
         name: "P5 Chinese",
-        lessons: [
-          { id: "1", name: "Chinese Lesson 1", timestamp: 1672531199000 },
-        ],
+        lessons: [{ id: "1", name: "Chinese Lesson 1", timestamp: 1672531199000 }],
       },
       {
         id: "3",
@@ -60,9 +54,41 @@ const HomeScreen = () => {
       },
     ]
     setStudentSubjects(subjects)
-    setSelectedSubject(subjects.length > 0 ? subjects[0].name : "")
-    setUpcomingSubjectLessons(subjects.length > 0 ? subjects[0].lessons : [])
+    if (subjects.length > 0) {
+      setSelectedSubject(subjects[0].name)
+      setSubjectLesson(
+        subjects[0].lessons.sort((currLesson, nextLesson) => currLesson.timestamp - nextLesson.timestamp) // Will be best if we can do in db
+      )
+    }
+    setNextExam({
+      name: "P5 End-of-Year Exams (School)",
+      timestamp: 1726639043000,
+    })
   }, [])
+
+  useEffect(() => {
+    const selectedSubjectData = studentSubjects.find((subject) => subject.name === selectedSubject)
+    if (selectedSubjectData) {
+      setSubjectLesson(
+        selectedSubjectData.lessons.sort((currLesson, nextLesson) => currLesson.timestamp - nextLesson.timestamp)
+      )
+    }
+  }, [selectedSubject, studentSubjects])
+
+  const lessonUpperIndex = useMemo(() => {
+    return binarySearchUpperBound(
+      subjectLesson.map((lesson) => lesson.timestamp),
+      Date.now()
+    )
+  }, [subjectLesson])
+
+  const pastLesson = useMemo(() => {
+    return lessonUpperIndex === 0 ? null : subjectLesson[lessonUpperIndex - 1]
+  }, [lessonUpperIndex, subjectLesson])
+
+  const upcomingLesson = useMemo(() => {
+    return subjectLesson[lessonUpperIndex]
+  }, [lessonUpperIndex, subjectLesson])
 
   const handleStudentSwitch = () => {
     console.log("switch student")
@@ -75,20 +101,10 @@ const HomeScreen = () => {
   const studentSubjectItems = studentSubjects.map((subject, idx) => (
     <TouchableOpacity
       key={idx}
-      style={
-        selectedSubject === subject.name
-          ? styles.subjectButtonSelected
-          : styles.subjectButton
-      }
+      style={selectedSubject === subject.name ? styles.subjectButtonSelected : styles.subjectButton}
       onPress={() => handleSubjectOnPress(subject.name)}
     >
-      <Text
-        style={
-          selectedSubject === subject.name
-            ? styles.subjectTextSelected
-            : styles.subjectText
-        }
-      >
+      <Text style={selectedSubject === subject.name ? styles.subjectTextSelected : styles.subjectText}>
         {subject.name}
       </Text>
     </TouchableOpacity>
@@ -97,28 +113,6 @@ const HomeScreen = () => {
   const handleLessonOnPress = () => {
     console.log("handle lesson on press")
   }
-
-  const studentLessonItems = upcomingSubjectLesson
-    .sort(
-      (currLesson, nextLesson) => currLesson.timestamp - nextLesson.timestamp
-    )
-    .map((lesson, idx) => (
-      <View key={idx} style={styles.lessonCard}>
-        <Text style={styles.lessonTitle}>
-          {idx === 0 ? "Most recent class" : "Upcoming class"}
-        </Text>
-        <Text style={styles.lessonName}>{lesson.name}</Text>
-        <Text style={styles.lessonDate}>
-          {formatTimestampToDateString(lesson.timestamp)}
-        </Text>
-        <TouchableOpacity
-          style={styles.lessonButton}
-          onPress={handleLessonOnPress}
-        >
-          <Text style={styles.lessonButtonText}>something</Text>
-        </TouchableOpacity>
-      </View>
-    ))
 
   return (
     <ScrollView style={styles.container}>
@@ -132,11 +126,7 @@ const HomeScreen = () => {
         <Text style={styles.center}>{tuitionCenter}</Text>
       </View>
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.subjects}
-      >
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.subjects}>
         {studentSubjectItems}
       </ScrollView>
 
@@ -147,12 +137,25 @@ const HomeScreen = () => {
         </TouchableOpacity>
       </View>
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.lessons}
-      >
-        {studentLessonItems}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.lessons}>
+        {pastLesson && (
+          <LessonCard
+            title={"Most recent class"}
+            lesson={pastLesson}
+            theme={"blue"}
+            handleLessonOnPress={handleLessonOnPress}
+            buttonText={"View student review"}
+          />
+        )}
+        {upcomingLesson && (
+          <LessonCard
+            title={"Upcoming class"}
+            lesson={upcomingLesson}
+            theme={"gray"}
+            handleLessonOnPress={handleLessonOnPress}
+            buttonText={"View lesson plan"}
+          />
+        )}
       </ScrollView>
 
       <View style={styles.section}>
@@ -164,20 +167,13 @@ const HomeScreen = () => {
 
       <View style={styles.announcementCard}>
         <Text style={styles.announcementTitle}>Next Exam Countdown</Text>
-        <Text style={styles.announcementDays}>40 days</Text>
-        <Text style={styles.announcementText}>
-          to P5 End-of-Year Exams (School)
-        </Text>
+        <Text style={styles.announcementDays}>{getDayDifference(nextExam?.timestamp as number)} days</Text>
+        <Text style={styles.announcementText}>to {nextExam?.name}</Text>
       </View>
 
       <View style={styles.registrationCard}>
-        <Image
-          style={styles.registrationImage}
-          source={{ uri: "https://something-here" }}
-        />
-        <Text style={styles.registrationText}>
-          Registration for Academic Year 2024 Starts Now!
-        </Text>
+        <Image style={styles.registrationImage} source={{ uri: "https://something-here" }} />
+        <Text style={styles.registrationText}>Registration for Academic Year 2024 Starts Now!</Text>
       </View>
     </ScrollView>
   )
@@ -248,44 +244,6 @@ const styles = StyleSheet.create({
   lessons: {
     marginVertical: height * 0.015,
     paddingLeft: width * 0.04,
-  },
-  lessonCard: {
-    backgroundColor: "#F5F5F5",
-    padding: height * 0.02,
-    borderRadius: width * 0.02,
-    marginBottom: height * 0.01,
-    marginRight: width * 0.03,
-  },
-  lessonTitle: {
-    fontSize: width * 0.035,
-    color: "",
-    marginBottom: height * 0.005,
-  },
-  lessonName: {
-    fontSize: width * 0.045,
-    fontWeight: "bold",
-    color: "white",
-    marginBottom: height * 0.01,
-  },
-  lessonDate: {
-    fontSize: width * 0.035,
-    color: "white",
-    marginBottom: height * 0.02,
-  },
-  lessonButton: {
-    paddingVertical: height * 0.01,
-    paddingHorizontal: width * 0.04,
-    borderColor: "white",
-    borderWidth: 1,
-    borderRadius: width * 0.02,
-  },
-  lessonButtonText: {
-    color: "white",
-    textAlign: "center",
-  },
-  lessonButtonOutlineText: {
-    color: "blue",
-    textAlign: "center",
   },
   announcementCard: {
     marginHorizontal: width * 0.04,
