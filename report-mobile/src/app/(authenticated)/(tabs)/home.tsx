@@ -183,9 +183,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+    paddingHorizontal: width * 0.04,
   },
   header: {
-    padding: height * 0.02,
+    paddingVertical: height * 0.02,
   },
   headerTextContainer: {
     flexDirection: "row",
@@ -206,7 +207,6 @@ const styles = StyleSheet.create({
   },
   subjects: {
     marginBottom: height * 0.01,
-    paddingLeft: width * 0.04,
   },
   subjectButton: {
     paddingVertical: height * 0.01,
@@ -232,7 +232,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: width * 0.04,
   },
   sectionTitle: {
     fontSize: width * 0.05,
@@ -243,10 +242,8 @@ const styles = StyleSheet.create({
   },
   lessons: {
     marginVertical: height * 0.015,
-    paddingLeft: width * 0.04,
   },
   announcementCard: {
-    marginHorizontal: width * 0.04,
     marginVertical: height * 0.015,
     padding: height * 0.02,
     borderRadius: width * 0.02,
@@ -267,9 +264,8 @@ const styles = StyleSheet.create({
     color: "black",
   },
   registrationCard: {
-    marginHorizontal: width * 0.04,
     marginBottom: height * 0.015,
-    padding: height * 0.02,
+    paddingVertical: height * 0.02,
     borderRadius: width * 0.02,
     backgroundColor: "#f0f0f0",
   },
