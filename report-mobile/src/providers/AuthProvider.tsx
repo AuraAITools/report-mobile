@@ -13,6 +13,7 @@ import { KeycloakAuthManager } from "@/lib/keycloak/keycloak-auth-manager";
 import {  ISession } from "@/types/keycloak/session";
 import { AuthEventPublisher } from "@/types/keycloak/auth-event-publisher";
 import { useNavigation } from "@react-navigation/native";
+import { KeycloakUserLoginFailedError } from "@/types/keycloak/errors";
 
 export const keycloakAuthManager = KeycloakAuthManager.getInstance(
   AuraSecureStore.getInstance(),
@@ -45,21 +46,31 @@ export default function AuthProvider({ children }: PropsWithChildren) {
         console.log("im signed out")
       }
       if (event === "SIGNED_IN") {
+        console.debug("Signed in and redirecting to /(authenticated)")
+        setSession(prev => keycloakAuthManager.session)
         router.replace("/(authenticated)" as Href<string>)
       }
+
+      if (event === "SESSION_REFRESHED") {
+        console.debug("Session has been refreshed")
+      }
+
+      if (event === "SIGNED_UP") {
+        console.debug("user has just signed up")
+      }
+
+
     })
-    // async function loadSessionFromStorage() {
-    //   await keycloakAuthManager.loadUserSessionFromStorageAndLogin()
-    //   setSession(prev => {
-    //     console.debug(`in memory session changed: ${JSON.stringify(keycloakAuthManager.session)}`)
-    //     return keycloakAuthManager.session;
-    //   })
-    // }
-    // loadSessionFromStorage();
-    // async function loginUser() {
-    //   await keycloakAuthManager.loginUser("kevinliusingapore@gmail.com", "password");
-    // }
-    // loginUser();
+
+    async function loginUser(email: string, password: string) {
+      try {
+        await keycloakAuthManager.loginUser(email,password);        
+      } catch (error) {
+        if (error instanceof KeycloakUserLoginFailedError) {
+          console.error(`Login failed for username: ${email} password: ${password}`)
+        }
+      }
+    }
   }, []);
 
   return (

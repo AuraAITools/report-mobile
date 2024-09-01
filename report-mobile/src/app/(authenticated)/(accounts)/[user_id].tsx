@@ -9,7 +9,6 @@ import { useGetAllAccounts } from '@/api/accounts';
 export default function AccountsScreen() {
   const { user_id: user_id_params } = useLocalSearchParams();
   const user_id = typeof user_id_params == "string" ? user_id_params : user_id_params[0];
-  console.log("rendered")
   const { data, error, isLoading } = useGetAllAccounts(user_id);
 
   if (isLoading) {

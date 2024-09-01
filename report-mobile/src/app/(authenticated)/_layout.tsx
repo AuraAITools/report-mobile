@@ -10,11 +10,11 @@ const AuthenticatedLayout = () => {
   const router = useRouter();
 
   // if user is authenticated redirect to accounts screen
-  useEffect(() => {
-    if (!loading && session) {
-      // router.replace(`(accounts)/${session.user.id}` as Href<string>)
-    }
-  }, [session, loading])
+  // useEffect(() => {
+  //   if (!loading && session) {
+  //     router.replace(`(accounts)/${session.user.id}` as Href<string>)
+  //   }
+  // }, [session, loading])
 
   async function signOut() {
     console.log('signing out')
