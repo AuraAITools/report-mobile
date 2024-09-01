@@ -9,8 +9,8 @@ import { Stack } from "expo-router"
 import * as SplashScreen from "expo-splash-screen"
 import { useEffect } from "react"
 
-import { useColorScheme } from '@components/useColorScheme';
-import AuthProvider from '@/providers/AuthProvider';
+import { useColorScheme } from "@components/useColorScheme"
+import AuthProvider from "@/providers/AuthProvider"
 import { StyleSheet } from "react-native"
 import QueryProvider from "@/providers/QueryProvider"
 
@@ -55,7 +55,7 @@ function RootLayoutNav() {
         <QueryProvider>
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name='(auth)' />
-            <Stack.Screen name='(authenticated)' />
+            <Stack.Screen name='(authenticated)/(tabs)' />
           </Stack>
         </QueryProvider>
       </AuthProvider>
