@@ -11,9 +11,9 @@ export interface ISession {
 
 export function convertTokensToSession(accessToken: string, refreshToken: string): ISession {
   const userAccessToken = decodeAccessToken(accessToken);
-  console.debug(`user at: ${JSON.stringify(userAccessToken)}`)
+  console.debug(`decoded user access token: \n ${JSON.stringify(userAccessToken)}`)
   const userRefreshToken = decodeRefreshToken(refreshToken);
-  console.debug(`refresh at: ${JSON.stringify(refreshToken)}`)
+  console.debug(`decoded refresh token: \n ${JSON.stringify(refreshToken)}`)
 
   console.debug("converting token to session ...")
   if (!userAccessToken) {
@@ -23,7 +23,7 @@ export function convertTokensToSession(accessToken: string, refreshToken: string
   if (!userRefreshToken) {
     throw new DecodeTokenError(`Unable to decode user refresh token`);
   }
-  // this is undefined for some reason
+
   const user: IUser = {
     roles: [
       ...userAccessToken.realm_access.roles,
@@ -46,6 +46,8 @@ export function convertTokensToSession(accessToken: string, refreshToken: string
     refresh_token: refreshToken,
     user: user,
   };
+
+  console.debug(`converted session: ${JSON.stringify(session)} `)
 
   return session;
 }

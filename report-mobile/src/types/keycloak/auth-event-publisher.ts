@@ -5,7 +5,7 @@ export class AuthEventPublisher {
   private subscriptions: Map<string, Subscription>;
   // TODO: implement lock for publishing events
   // private lock: Lock;
-  //TODO: implement auto refresh token ticker
+  // TODO: implement auto refresh token ticker
 
   private constructor() {
     this.subscriptions = new Map();
@@ -44,10 +44,10 @@ export class AuthEventPublisher {
    * @param event
    */
   public publishEvent(event: AuthEvent) {
-    console.log(`publishing event ${event.toString()}`)
+    console.debug(`publishing event ${event.toString()}`)
     // loop through all handlers and emit all of them
     this.subscriptions.forEach((subscription, key) => {
-      console.log(`calling callback for event ${event.toString()}`);
+      console.debug(`calling callback for event ${event.toString()}`);
       subscription.callback(event);
     });
   }

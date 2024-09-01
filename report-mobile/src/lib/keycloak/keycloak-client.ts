@@ -298,7 +298,6 @@ export class KeycloakClient implements IAuthClient {
     const headers = {
       "Content-Type": "application/x-www-form-urlencoded",
     };
-    console.log(`data: ${JSON.stringify(data)}`)
     try {
       const authResponse = await axios.post<KeycloakAuthResponse>(
         this.tokenEndpoint.toString(),
