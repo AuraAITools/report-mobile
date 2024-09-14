@@ -10,7 +10,7 @@ export default function Index() {
   }
 
   if (!session) {
-    return <Redirect href={`/(auth)/splash` as Href<String>} />
+    return <Redirect href={`/(auth)/home` as Href<String>} />
   }
 
   return <Redirect href={"/(authenticated)" as Href<String>} />
