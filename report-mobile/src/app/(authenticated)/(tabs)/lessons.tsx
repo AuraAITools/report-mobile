@@ -135,6 +135,7 @@ const LessonScreen = () => {
 
   const handleSubjectOnPress = (subject: Subject) => {
     setSelectedSubject(subject)
+    setSubjectLesson(subject.lessons)
   }
 
   const studentSubjectItems = studentSubjects.map((subject, idx) => (
@@ -163,14 +164,18 @@ const LessonScreen = () => {
     })
   }
 
-  const studentSubjectLessons = groupLessonsByMonthAndYear(subjectLesson).map((lessonGroup, idx) => {
-    return (
-      <View key={idx}>
-        <Text style={styles.dateHeader}>{lessonGroup.monthYear}</Text>
-        {mapLessonToCard(lessonGroup.lessons)}
-      </View>
-    )
-  })
+  const studentSubjectLessons = useMemo(
+    () =>
+      groupLessonsByMonthAndYear(subjectLesson).map((lessonGroup, idx) => {
+        return (
+          <View key={idx}>
+            <Text style={styles.dateHeader}>{lessonGroup.monthYear}</Text>
+            {mapLessonToCard(lessonGroup.lessons)}
+          </View>
+        )
+      }),
+    [subjectLesson]
+  )
 
   return (
     <View style={styles.container}>
