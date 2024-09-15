@@ -23,26 +23,10 @@ import {
 
 import * as WebBrowser from "expo-web-browser";
 import { ActivityIndicator } from "react-native";
+import UserDetails from "@/types/auth/UserDetails";
+import AuthData from "@/types/auth/AuthData";
 
-type UserDetails = {
-  sub: string;
-  email_verified: boolean;
-  name: string;
-  preferred_username: string;
-  given_name: string;
-  family_name: string;
-  email: string;
-};
-
-type AuthData = {
-  userDetails: UserDetails | undefined;
-  loginUser: () => Promise<void>;
-  logoutUser: () => Promise<void>;
-  refreshUserSession: () => Promise<void>;
-  isAuthenticated: boolean;
-};
-
-// initial context
+// initial auth context
 const AuthContext = createContext<AuthData>({
   userDetails: undefined,
   loginUser: async () => {},
