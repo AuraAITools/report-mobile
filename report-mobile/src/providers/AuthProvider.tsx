@@ -5,173 +5,234 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { Href, useRouter } from "expo-router";
-import { AuraSecureStore } from "@/lib/secure-store";
-import { KeycloakClient } from "@/lib/keycloak/keycloak-client";
+import { useRouter } from "expo-router";
 import { keycloakClientConfig } from "@/configs/keycloakClientConfig";
-import { KeycloakAuthManager } from "@/lib/keycloak/keycloak-auth-manager";
-import { ISession } from "@/types/keycloak/session";
-import { AuthEventPublisher } from "@/types/keycloak/auth-event-publisher";
-import {
-  KeycloakClientLogoutError,
-  KeycloakClientSignUpError,
-  KeycloakTokenRefreshError,
-  KeycloakUserLoginFailedError,
-} from "@/types/keycloak/errors";
 
-export const keycloakAuthManager = KeycloakAuthManager.getInstance(
-  AuraSecureStore.getInstance(),
-  new KeycloakClient(keycloakClientConfig),
-  AuthEventPublisher.getInstance()
-);
+import {
+  AuthSessionResult,
+  exchangeCodeAsync,
+  makeRedirectUri,
+  useAuthRequest,
+  useAutoDiscovery,
+  DiscoveryDocument,
+  TokenResponse,
+  fetchUserInfoAsync,
+  refreshAsync,
+  revokeAsync,
+} from "expo-auth-session";
+
+import * as WebBrowser from "expo-web-browser";
+import { ActivityIndicator } from "react-native";
+
+type UserDetails = {
+  sub: string;
+  email_verified: boolean;
+  name: string;
+  preferred_username: string;
+  given_name: string;
+  family_name: string;
+  email: string;
+};
 
 type AuthData = {
-  session: ISession | null;
-  loading: Boolean;
-  loginUser: (username: string, password: string) => Promise<void>;
-  signupUser: (
-    email: string,
-    password: string,
-    firstName: string,
-    lastName: string
-  ) => Promise<void>;
-  logoutUser: () => void;
-  refreshUserSession: () => void;
-  loadUserSessionFromSecureStorageToMemory: () => Promise<void>;
+  userDetails: UserDetails | undefined;
+  loginUser: () => Promise<void>;
+  logoutUser: () => Promise<void>;
+  refreshUserSession: () => Promise<void>;
+  isAuthenticated: boolean;
 };
 
 // initial context
 const AuthContext = createContext<AuthData>({
-  session: null,
-  loading: false,
+  userDetails: undefined,
   loginUser: async () => {},
-  signupUser: async () => {},
   logoutUser: async () => {},
   refreshUserSession: async () => {},
-  loadUserSessionFromSecureStorageToMemory: async () => {},
+  isAuthenticated: false,
 });
 
 export default function AuthProvider({ children }: PropsWithChildren) {
   const router = useRouter();
 
-  const [session, setSession] = useState<ISession | null>(
-    keycloakAuthManager.session
+  const [authSession, setAuthSession] = useState<TokenResponse | undefined>();
+  const [userDetails, setUserDetails] = useState<UserDetails | undefined>();
+  const [refreshToken, setRefreshToken] = useState<string | undefined>();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
+  const discovery = useAutoDiscovery(keycloakClientConfig.issuerUrl);
+
+  const redirectUri = makeRedirectUri({
+    scheme: "aura-report",
+    path: "auth/callback",
+  });
+
+  const [request, frontChannelResponse, promptLoginAsync] = useAuthRequest(
+    {
+      clientId: keycloakClientConfig.clientId,
+      redirectUri: redirectUri,
+      scopes: ["openid", "email", "profile", "offline_access"],
+      usePKCE: true,
+    },
+    discovery
   );
-  const [loading, setLoading] = useState<Boolean>(false);
 
+  // optimises opening of web browser
   useEffect(() => {
-    keycloakAuthManager.onEvent((event) => {
-      if (event === "SIGNED_OUT") {
-        console.debug("signing out");
-        router.replace("/(auth)/home");
-      }
-      if (event === "SIGNED_IN") {
-        console.debug("Signed in and redirecting to /(authenticated)");
-        setSession((prev) => {
-          console.debug(`previous session: \n ${JSON.stringify(prev)}`);
-          console.debug(
-            `new session: \n ${JSON.stringify(keycloakAuthManager.session)}`
-          );
-          return keycloakAuthManager.session;
-        });
-        router.replace("/(authenticated)/(tabs)/home");
-      }
+    WebBrowser.warmUpAsync();
 
-      if (event === "SESSION_REFRESHED") {
-        console.debug("Session has been refreshed");
-      }
-
-      if (event === "SIGNED_UP") {
-        console.debug("user has just signed up");
-      }
-    });
+    return () => {
+      WebBrowser.coolDownAsync();
+    };
   }, []);
 
-  async function loginUser(email: string, password: string) {
-    try {
-      setLoading(true);
-      await keycloakAuthManager.loginUser(email, password);
-    } catch (error) {
-      if (error instanceof KeycloakUserLoginFailedError) {
-        console.error(
-          `Login failed for username: ${email} password: ${password}`
-        );
+  // on front channel response change, do a frontchannel code exchange for idt and at
+  useEffect(() => {
+    executeCodeExchangeAsync();
+    async function executeCodeExchangeAsync() {
+      if (!frontChannelResponse) {
+        console.debug(`initial auth result null`);
+      } else {
+        try {
+          let session = await frontChannelCodeExchange(
+            frontChannelResponse,
+            discovery!,
+            request?.codeVerifier
+          );
+          setAuthSession(session);
+          setRefreshToken(session.refreshToken);
+          setIsAuthenticated(true);
+          router.replace(`/(authenticated)/(tabs)/home`);
+        } catch (error) {
+          console.debug(error);
+        }
       }
-    } finally {
-      setLoading(false);
     }
-    setSession(keycloakAuthManager.session);
-  }
+  }, [frontChannelResponse]);
 
-  async function logoutUser() {
-    try {
-      setLoading(true);
-      await keycloakAuthManager.logoutUserSession();
-    } catch (error) {
-      if (error instanceof KeycloakClientLogoutError) {
-        console.error(`Logout failed`);
-      }
-    } finally {
-      setLoading(false);
+  // on authSession or discovery changes, refetch user info from user_info endpoint
+  useEffect(() => {
+    if (!discovery || !authSession) {
+      console.debug(`no discovery document`);
+    } else {
+      console.debug(`fetching user info`);
+      fetchUserInfo(authSession, discovery);
     }
-    setSession(keycloakAuthManager.session);
-  }
+  }, [authSession, discovery]);
 
-  async function signupUser(
-    email: string,
-    password: string,
-    firstName: string,
-    lastName: string
+  async function fetchUserInfo(
+    tokenResult: TokenResponse,
+    discovery: DiscoveryDocument
   ) {
-    try {
-      setLoading(true);
-      await keycloakAuthManager.signupUser(
-        email,
-        password,
-        firstName,
-        lastName,
-        true
-      );
-    } catch (error) {
-      if (error instanceof KeycloakClientSignUpError) {
-        console.error(
-          `Login failed for username: ${email} password: ${password}`
-        );
+    const userDetails = await fetchUserInfoAsync(tokenResult, discovery).catch(
+      (err) => {
+        console.error(err);
       }
-    } finally {
-      setLoading(false);
+    );
+
+    if (userDetails) {
+      setUserDetails(userDetails as UserDetails);
     }
-    setSession(keycloakAuthManager.session);
+    console.debug(
+      `User Details: ${JSON.stringify(userDetails as UserDetails)}`
+    );
+  }
+
+  /**
+   * exchanges frontchannel code for access token and idtoken
+   * @param authResponse
+   * @param discovery
+   * @param codeVerifier
+   * @returns
+   */
+  async function frontChannelCodeExchange(
+    authResponse: AuthSessionResult,
+    discovery: DiscoveryDocument,
+    codeVerifier: string | undefined
+  ) {
+    if (authResponse.type === "success") {
+      return await exchangeCodeAsync(
+        {
+          code: authResponse.params.code,
+          redirectUri: redirectUri,
+          clientId: keycloakClientConfig.clientId,
+          clientSecret: keycloakClientConfig.clientSecret,
+          extraParams: {
+            code_verifier: codeVerifier || "",
+          },
+        },
+        discovery
+      );
+    } else {
+      throw new Error(`frontchannel failed to execute`);
+    }
+  }
+
+  /**
+   * prompts user to login via a embedded web browser
+   */
+  async function loginUser() {
+    promptLoginAsync();
+  }
+
+  /**
+   * logout user by revoking refresh token
+   */
+  async function logoutUser() {
+    console.debug(`logging out user ${refreshToken}`);
+    try {
+      await revokeAsync(
+        {
+          token: refreshToken!,
+          clientId: keycloakClientConfig.clientId,
+          clientSecret: keycloakClientConfig.clientSecret,
+        },
+        discovery!
+      );
+      setIsAuthenticated(false);
+      router.replace("/(auth)/home");
+    } catch (error) {
+      console.error(`logout failed with  ${error}`);
+    }
   }
 
   async function refreshUserSession() {
-    try {
-      setLoading(true);
-      await keycloakAuthManager.refreshSession();
-    } catch (error) {
-      if (error instanceof KeycloakTokenRefreshError) {
-        console.error(`Failed to refresh user session`);
+    if (!discovery) {
+      console.debug(`refresh failed as discovery is not fetched yet`);
+    } else {
+      console.debug(`refreshing user session: ${refreshToken}`);
+      const session = await refreshAsync(
+        {
+          refreshToken: refreshToken,
+          clientId: keycloakClientConfig.clientId,
+          clientSecret: keycloakClientConfig.clientSecret,
+        },
+        discovery
+      ).catch((err) => {
+        console.error(err);
+        setIsAuthenticated(false);
+      });
+
+      if (session) {
+        console.debug("updating session");
+        setAuthSession(session);
+        setRefreshToken(session.refreshToken);
+        setIsAuthenticated(true);
       }
-    } finally {
-      setLoading(false);
     }
-    setSession(keycloakAuthManager.session);
   }
 
-  async function loadUserSessionFromSecureStorageToMemory() {
-    await keycloakAuthManager.loadUserSessionFromStorageAndLogin();
+  if (!discovery) {
+    return <ActivityIndicator />;
   }
 
   return (
     <AuthContext.Provider
       value={{
-        session,
-        loading,
+        userDetails,
         loginUser,
         logoutUser,
-        signupUser,
         refreshUserSession,
-        loadUserSessionFromSecureStorageToMemory,
+        isAuthenticated,
       }}
     >
       {children}
@@ -179,5 +240,4 @@ export default function AuthProvider({ children }: PropsWithChildren) {
   );
 }
 
-// custom hook to provide our auth context
 export const useAuth = () => useContext(AuthContext);

@@ -1,13 +1,7 @@
 import axios from "axios";
 import { KeycloakAuthResponse } from "@/types/keycloak/auth-response";
 import { KeycloakClientFetchClientAccessTokenError, KeycloakClientLogoutError, KeycloakClientSignUpError, KeycloakTokenRefreshError, KeycloakUserLoginFailedError } from "@/types/keycloak/errors";
-
-export type KeycloakClientConfig = {
-  clientId: string;
-  clientSecret: string;
-  keycloakUrl: URL;
-  realm: string;
-};
+import { KeycloakClientConfig } from "@/configs/keycloakClientConfig";
 
 export enum GrantTypes {
   PASSWORD = "password",
@@ -30,7 +24,7 @@ export interface IAuthClient {
 export class KeycloakClient implements IAuthClient {
   protected clientId: string;
   protected clientSecret: string;
-  protected keycloakUrl: URL;
+  protected host: string;
   protected realm: string;
   protected tokenEndpoint: URL;
   protected logoutEndpoint: URL;
@@ -39,19 +33,19 @@ export class KeycloakClient implements IAuthClient {
   constructor(config: KeycloakClientConfig) {
     this.clientId = config.clientId;
     this.clientSecret = config.clientSecret;
-    this.keycloakUrl = config.keycloakUrl;
+    this.host = config.host;
     this.realm = config.realm;
     this.tokenEndpoint = new URL(
       `/realms/${config.realm}/protocol/openid-connect/token`,
-      config.keycloakUrl
+      config.host
     );
     this.logoutEndpoint = new URL(
       `/realms/${config.realm}/protocol/openid-connect/logout`,
-      config.keycloakUrl
+      config.host
     );
     this.userManagementEndpoint = new URL(
       `/admin/realms/${config.realm}/users`,
-      config.keycloakUrl
+      config.host
     );
   }
 

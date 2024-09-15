@@ -20,9 +20,8 @@ const SignInScreen: React.FC = () => {
 
   const handleLogin = async () => {
     try {
-      await auth.loginUser(email, password)      
+      await auth.loginUser()      
     } catch (error) {
-      // TODO: handle log in errors
       console.error(`problem logging in`)
     } finally {
       setEmail("")

@@ -6,10 +6,13 @@ import { Exam } from "@/types/models/Exam"
 import { Subject, SubjectLesson } from "@/types/models/Subject"
 import { getDayDifference } from "@/util/DateTimeUtil"
 import { binarySearchUpperBound } from "@/util/Utils"
+import { useAuth } from "@/providers/AuthProvider"
 
 const { width, height } = Dimensions.get("window")
 
 const HomeScreen = () => {
+
+  const {userDetails} = useAuth();
   const [studentName, setStudentName] = useState<string>("")
   const [tuitionCenter, setTuitionCenter] = useState<string>("")
   const [studentSubjects, setStudentSubjects] = useState<Subject[]>([])
@@ -118,7 +121,7 @@ const HomeScreen = () => {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerTextContainer}>
-          <Text style={styles.name}>{studentName}</Text>
+          <Text style={styles.name}>{userDetails?.name}</Text>
           <TouchableOpacity onPress={handleStudentSwitch}>
             <Text style={styles.switch}>Switch</Text>
           </TouchableOpacity>
