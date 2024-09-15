@@ -1,11 +1,7 @@
-export type SubjectLesson = {
-  id: string
-  name: string
-  timestamp: number
-}
+import { Lesson } from "./Lesson"
 
 export type Subject = {
   id: string
   name: string
-  lessons: SubjectLesson[]
+  lessons: Lesson[]
 }
