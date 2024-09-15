@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "aura-report",
+    "scheme": "com.aura.report",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
