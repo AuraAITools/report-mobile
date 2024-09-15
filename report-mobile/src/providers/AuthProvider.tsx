@@ -46,7 +46,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
   const discovery = useAutoDiscovery(keycloakClientConfig.issuerUrl);
 
   const redirectUri = makeRedirectUri({
-    scheme: "aura-report",
+    scheme: "com.aura.report",
     path: "auth/callback",
   });
 
