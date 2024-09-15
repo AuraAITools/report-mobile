@@ -3,9 +3,10 @@ import { Dimensions } from "react-native"
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from "react-native"
 import LessonCard from "@/components/ui/LessonCard"
 import { Exam } from "@/types/models/Exam"
-import { Subject, SubjectLesson } from "@/types/models/Subject"
+import { Subject } from "@/types/models/Subject"
 import { getDayDifference } from "@/util/DateTimeUtil"
 import { binarySearchUpperBound } from "@/util/Utils"
+import { Lesson } from "@/types/models/Lesson"
 
 const { width, height } = Dimensions.get("window")
 
@@ -13,8 +14,8 @@ const HomeScreen = () => {
   const [studentName, setStudentName] = useState<string>("")
   const [tuitionCenter, setTuitionCenter] = useState<string>("")
   const [studentSubjects, setStudentSubjects] = useState<Subject[]>([])
-  const [selectedSubject, setSelectedSubject] = useState<string>("")
-  const [subjectLesson, setSubjectLesson] = useState<SubjectLesson[]>([])
+  const [selectedSubject, setSelectedSubject] = useState<Subject>()
+  const [subjectLesson, setSubjectLesson] = useState<Lesson[]>([])
   const [nextExam, setNextExam] = useState<Exam>()
 
   useEffect(() => {
@@ -55,7 +56,7 @@ const HomeScreen = () => {
     ]
     setStudentSubjects(subjects)
     if (subjects.length > 0) {
-      setSelectedSubject(subjects[0].name)
+      setSelectedSubject(subjects[0])
       setSubjectLesson(
         subjects[0].lessons.sort((currLesson, nextLesson) => currLesson.timestamp - nextLesson.timestamp) // Will be best if we can do in db
       )
@@ -67,10 +68,9 @@ const HomeScreen = () => {
   }, [])
 
   useEffect(() => {
-    const selectedSubjectData = studentSubjects.find((subject) => subject.name === selectedSubject)
-    if (selectedSubjectData) {
+    if (selectedSubject) {
       setSubjectLesson(
-        selectedSubjectData.lessons.sort((currLesson, nextLesson) => currLesson.timestamp - nextLesson.timestamp)
+        selectedSubject.lessons.sort((currLesson, nextLesson) => currLesson.timestamp - nextLesson.timestamp)
       )
     }
   }, [selectedSubject, studentSubjects])
@@ -94,17 +94,17 @@ const HomeScreen = () => {
     console.log("switch student")
   }
 
-  const handleSubjectOnPress = (subjectName: string) => {
-    setSelectedSubject(subjectName)
+  const handleSubjectOnPress = (subject: Subject) => {
+    setSelectedSubject(subject)
   }
 
   const studentSubjectItems = studentSubjects.map((subject, idx) => (
     <TouchableOpacity
       key={idx}
-      style={selectedSubject === subject.name ? styles.subjectButtonSelected : styles.subjectButton}
-      onPress={() => handleSubjectOnPress(subject.name)}
+      style={selectedSubject?.name === subject.name ? styles.subjectButtonSelected : styles.subjectButton}
+      onPress={() => handleSubjectOnPress(subject)}
     >
-      <Text style={selectedSubject === subject.name ? styles.subjectTextSelected : styles.subjectText}>
+      <Text style={selectedSubject?.name === subject.name ? styles.subjectTextSelected : styles.subjectText}>
         {subject.name}
       </Text>
     </TouchableOpacity>
@@ -183,10 +183,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingHorizontal: width * 0.04,
   },
   header: {
-    paddingVertical: height * 0.02,
+    padding: height * 0.02,
   },
   headerTextContainer: {
     flexDirection: "row",
@@ -207,6 +206,7 @@ const styles = StyleSheet.create({
   },
   subjects: {
     marginBottom: height * 0.01,
+    paddingLeft: width * 0.04,
   },
   subjectButton: {
     paddingVertical: height * 0.01,
@@ -232,6 +232,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingHorizontal: width * 0.04,
   },
   sectionTitle: {
     fontSize: width * 0.05,
@@ -242,8 +243,10 @@ const styles = StyleSheet.create({
   },
   lessons: {
     marginVertical: height * 0.015,
+    paddingLeft: width * 0.04,
   },
   announcementCard: {
+    marginHorizontal: width * 0.04,
     marginVertical: height * 0.015,
     padding: height * 0.02,
     borderRadius: width * 0.02,
@@ -264,8 +267,9 @@ const styles = StyleSheet.create({
     color: "black",
   },
   registrationCard: {
+    marginHorizontal: width * 0.04,
     marginBottom: height * 0.015,
-    paddingVertical: height * 0.02,
+    padding: height * 0.02,
     borderRadius: width * 0.02,
     backgroundColor: "#f0f0f0",
   },
