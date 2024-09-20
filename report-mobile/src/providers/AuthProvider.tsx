@@ -69,26 +69,26 @@ export default function AuthProvider({ children }: PropsWithChildren) {
     };
   }, []);
 
-  // on front channel response change, do a frontchannel code exchange for idt and at
+  // on front channel response change, do a frontchannel code exchange for Identity Token and Access Token
   useEffect(() => {
     executeCodeExchangeAsync();
     async function executeCodeExchangeAsync() {
       if (!frontChannelResponse) {
         console.debug(`initial auth result null`);
-      } else {
-        try {
-          let session = await frontChannelCodeExchange(
-            frontChannelResponse,
-            discovery!,
-            request?.codeVerifier
-          );
-          setAuthSession(session);
-          setRefreshToken(session.refreshToken);
-          setIsAuthenticated(true);
-          router.replace(`/(authenticated)/(tabs)/home`);
-        } catch (error) {
-          console.debug(error);
-        }
+        return;
+      }
+      try {
+        let session = await frontChannelCodeExchange(
+          frontChannelResponse,
+          discovery!,
+          request?.codeVerifier
+        );
+        setAuthSession(session);
+        setRefreshToken(session.refreshToken);
+        setIsAuthenticated(true);
+        router.replace(`/(authenticated)/(tabs)/home`);
+      } catch (error) {
+        console.debug(error);
       }
     }
   }, [frontChannelResponse]);
@@ -182,26 +182,26 @@ export default function AuthProvider({ children }: PropsWithChildren) {
   async function refreshUserSession() {
     if (!discovery) {
       console.debug(`refresh failed as discovery is not fetched yet`);
-    } else {
-      console.debug(`refreshing user session: ${refreshToken}`);
-      const session = await refreshAsync(
-        {
-          refreshToken: refreshToken,
-          clientId: keycloakClientConfig.clientId,
-          clientSecret: keycloakClientConfig.clientSecret,
-        },
-        discovery
-      ).catch((err) => {
-        console.error(err);
-        setIsAuthenticated(false);
-      });
+      return;
+    }
+    console.debug(`refreshing user session: ${refreshToken}`);
+    const session = await refreshAsync(
+      {
+        refreshToken: refreshToken,
+        clientId: keycloakClientConfig.clientId,
+        clientSecret: keycloakClientConfig.clientSecret,
+      },
+      discovery
+    ).catch((err) => {
+      console.error(err);
+      setIsAuthenticated(false);
+    });
 
-      if (session) {
-        console.debug("updating session");
-        setAuthSession(session);
-        setRefreshToken(session.refreshToken);
-        setIsAuthenticated(true);
-      }
+    if (session) {
+      console.debug("updating session");
+      setAuthSession(session);
+      setRefreshToken(session.refreshToken);
+      setIsAuthenticated(true);
     }
   }
 
