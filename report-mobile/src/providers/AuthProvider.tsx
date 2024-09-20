@@ -5,68 +5,223 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { supabase } from "@/lib/supabase";
-import { Session } from "@supabase/supabase-js";
-import { AppState } from "react-native";
-import { Href, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
+import { keycloakClientConfig } from "@/configs/keycloakClientConfig";
 
-type AuthData = {
-  session: Session | null;
-  loading: Boolean;
-};
+import {
+  AuthSessionResult,
+  exchangeCodeAsync,
+  makeRedirectUri,
+  useAuthRequest,
+  useAutoDiscovery,
+  DiscoveryDocument,
+  TokenResponse,
+  fetchUserInfoAsync,
+  refreshAsync,
+  revokeAsync,
+} from "expo-auth-session";
 
-// initial context
+import * as WebBrowser from "expo-web-browser";
+import { ActivityIndicator } from "react-native";
+import UserDetails from "@/types/auth/UserDetails";
+import AuthData from "@/types/auth/AuthData";
+
+// initial auth context
 const AuthContext = createContext<AuthData>({
-  session: null,
-  loading: true,
-});
-
-// whenever screen becomes active, exchange AT & RT for a new pair
-AppState.addEventListener("change", (state) => {
-  console.log(`event: ${state} fired`);
-
-  if (state === "active") {
-    supabase.auth.startAutoRefresh();
-  } else {
-    supabase.auth.stopAutoRefresh();
-  }
+  userDetails: undefined,
+  loginUser: async () => {},
+  logoutUser: async () => {},
+  refreshUserSession: async () => {},
+  isAuthenticated: false,
 });
 
 export default function AuthProvider({ children }: PropsWithChildren) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState<Boolean>(true);
   const router = useRouter();
 
+  const [authSession, setAuthSession] = useState<TokenResponse | undefined>();
+  const [userDetails, setUserDetails] = useState<UserDetails | undefined>();
+  const [refreshToken, setRefreshToken] = useState<string | undefined>();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
+  const discovery = useAutoDiscovery(keycloakClientConfig.issuerUrl);
+
+  const redirectUri = makeRedirectUri({
+    scheme: "com.aura.report",
+    path: "auth/callback",
+  });
+
+  const [request, frontChannelResponse, promptLoginAsync] = useAuthRequest(
+    {
+      clientId: keycloakClientConfig.clientId,
+      redirectUri: redirectUri,
+      scopes: ["openid", "email", "profile", "offline_access"],
+      usePKCE: true,
+    },
+    discovery
+  );
+
+  // optimises opening of web browser
   useEffect(() => {
-    // register listener on AuthProvider mount to listen to state changes
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log(`auth event: ${event}`);
-        setSession(session);
-        setLoading(false);
+    WebBrowser.warmUpAsync();
 
-        if (event === "SIGNED_IN") {
-          router.replace(
-            `/(authenticated)/(accounts)/${session?.user.id}` as Href<String>
-          );
-        } else if (event === "SIGNED_OUT") {
-          router.replace("/");
-        }
-      }
-    );
-
-    // clean up auth listener on AuthProvider dismount
     return () => {
-      authListener.subscription.unsubscribe();
+      WebBrowser.coolDownAsync();
     };
   }, []);
 
+  // on front channel response change, do a frontchannel code exchange for Identity Token and Access Token
+  useEffect(() => {
+    executeCodeExchangeAsync();
+    async function executeCodeExchangeAsync() {
+      if (!frontChannelResponse) {
+        console.debug(`initial auth result null`);
+        return;
+      }
+      try {
+        let session = await frontChannelCodeExchange(
+          frontChannelResponse,
+          discovery!,
+          request?.codeVerifier
+        );
+        setAuthSession(session);
+        setRefreshToken(session.refreshToken);
+        setIsAuthenticated(true);
+        router.replace(`/(authenticated)/(tabs)/home`);
+      } catch (error) {
+        console.debug(error);
+      }
+    }
+  }, [frontChannelResponse]);
+
+  // on authSession or discovery changes, refetch user info from user_info endpoint
+  useEffect(() => {
+    if (!discovery || !authSession) {
+      console.debug(`no discovery document`);
+    } else {
+      console.debug(`fetching user info`);
+      fetchUserInfo(authSession, discovery);
+    }
+  }, [authSession, discovery]);
+
+  async function fetchUserInfo(
+    tokenResult: TokenResponse,
+    discovery: DiscoveryDocument
+  ) {
+    const userDetails = await fetchUserInfoAsync(tokenResult, discovery).catch(
+      (err) => {
+        console.error(err);
+      }
+    );
+
+    if (userDetails) {
+      setUserDetails(userDetails as UserDetails);
+    }
+    console.debug(
+      `User Details: ${JSON.stringify(userDetails as UserDetails)}`
+    );
+  }
+
+  /**
+   * exchanges frontchannel code for access token and idtoken
+   * @param authResponse
+   * @param discovery
+   * @param codeVerifier
+   * @returns
+   */
+  async function frontChannelCodeExchange(
+    authResponse: AuthSessionResult,
+    discovery: DiscoveryDocument,
+    codeVerifier: string | undefined
+  ) {
+    if (authResponse.type === "success") {
+      return await exchangeCodeAsync(
+        {
+          code: authResponse.params.code,
+          redirectUri: redirectUri,
+          clientId: keycloakClientConfig.clientId,
+          clientSecret: keycloakClientConfig.clientSecret,
+          extraParams: {
+            code_verifier: codeVerifier || "",
+          },
+        },
+        discovery
+      );
+    } else {
+      throw new Error(`frontchannel failed to execute`);
+    }
+  }
+
+  /**
+   * prompts user to login via a embedded web browser
+   */
+  async function loginUser() {
+    promptLoginAsync();
+  }
+
+  /**
+   * logout user by revoking refresh token
+   */
+  async function logoutUser() {
+    console.debug(`logging out user ${refreshToken}`);
+    try {
+      await revokeAsync(
+        {
+          token: refreshToken!,
+          clientId: keycloakClientConfig.clientId,
+          clientSecret: keycloakClientConfig.clientSecret,
+        },
+        discovery!
+      );
+      setIsAuthenticated(false);
+      router.replace("/(auth)/home");
+    } catch (error) {
+      console.error(`logout failed with  ${error}`);
+    }
+  }
+
+  async function refreshUserSession() {
+    if (!discovery) {
+      console.debug(`refresh failed as discovery is not fetched yet`);
+      return;
+    }
+    console.debug(`refreshing user session: ${refreshToken}`);
+    const session = await refreshAsync(
+      {
+        refreshToken: refreshToken,
+        clientId: keycloakClientConfig.clientId,
+        clientSecret: keycloakClientConfig.clientSecret,
+      },
+      discovery
+    ).catch((err) => {
+      console.error(err);
+      setIsAuthenticated(false);
+    });
+
+    if (session) {
+      console.debug("updating session");
+      setAuthSession(session);
+      setRefreshToken(session.refreshToken);
+      setIsAuthenticated(true);
+    }
+  }
+
+  if (!discovery) {
+    return <ActivityIndicator />;
+  }
+
   return (
-    <AuthContext.Provider value={{ session, loading }}>
+    <AuthContext.Provider
+      value={{
+        userDetails,
+        loginUser,
+        logoutUser,
+        refreshUserSession,
+        isAuthenticated,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
 
-// custom hook to provide our auth context
 export const useAuth = () => useContext(AuthContext);

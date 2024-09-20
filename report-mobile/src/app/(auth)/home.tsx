@@ -1,28 +1,25 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import LinkButton from "@/components/ui/LinkButton";
 import { constmaxWidth, minWidth } from "@/constants/ScreenDimension";
 import Spacer from "@/components/ui/Spacer";
+import { useAuth } from "@/providers/AuthProvider";
+import RegularButton from "@/components/ui/RegularButton";
 
 const SplashScreen: React.FC = () => {
+  const auth = useAuth();
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Better Learning Begins Here</Text>
       <Text style={styles.subtitle}>Start using Aura Learning</Text>
       <View>
-        <LinkButton
-          href="/sign-in"
+        <RegularButton
           label="Sign In"
           buttonStyle={styles.signInButton}
           textStyle={styles.signInButtonText}
+          onPress={auth.loginUser}
         />
         <Spacer />
-        <LinkButton
-          href="/sign-up"
-          label="Continue Registration"
-          buttonStyle={styles.signUpButton}
-          textStyle={styles.signUpButtonText}
-        />
       </View>
     </View>
   );
@@ -61,19 +58,6 @@ const styles = StyleSheet.create({
   signInButtonText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "600",
-  },
-  signUpButton: {
-    minWidth: minWidth,
-    maxWidth: constmaxWidth,
-    backgroundColor: "#fff",
-    borderColor: "#000",
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-  },
-  signUpButtonText: {
-    color: "#000",
     fontWeight: "600",
   },
 });

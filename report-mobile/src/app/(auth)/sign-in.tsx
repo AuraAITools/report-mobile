@@ -10,14 +10,23 @@ import PasswordInput from "@/components/ui/inputs/PasswordInput"
 import GenericInput from "@/components/ui/inputs/GenericInput"
 import Divider from "@/components/ui/Divider"
 import LinkButton from "@/components/ui/LinkButton"
+import { useAuth } from "@/providers/AuthProvider"
 
 const SignInScreen: React.FC = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [registrationCode, setRegistrationCode] = useState("")
+  const auth = useAuth();
 
-  const handleLogin = () => {
-    //TODO: handle login logic here
+  const handleLogin = async () => {
+    try {
+      await auth.loginUser()      
+    } catch (error) {
+      console.error(`problem logging in`)
+    } finally {
+      setEmail("")
+      setPassword("")
+    }
   }
 
   return (
