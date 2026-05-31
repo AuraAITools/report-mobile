@@ -7,4 +7,10 @@ expo-env.d.ts
 android
 ios
 .env
+
+# E2E test artifacts (keep directory structure via .gitkeep)
+e2e/artifacts/screenshots/*
+!e2e/artifacts/screenshots/.gitkeep
+e2e/artifacts/videos/*
+!e2e/artifacts/videos/.gitkeep
 # @end expo-cli

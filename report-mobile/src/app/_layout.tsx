@@ -1,70 +1,99 @@
-import FontAwesome from "@expo/vector-icons/FontAwesome"
+import "@/global.css";
+import "@/i18n";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
-} from "@react-navigation/native"
-import { useFonts } from "expo-font"
-import { Stack } from "expo-router"
-import * as SplashScreen from "expo-splash-screen"
-import { useEffect } from "react"
+} from "@react-navigation/native";
+import { useFonts } from "expo-font";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { PropsWithChildren, useEffect } from "react";
 
-import { useColorScheme } from "@components/useColorScheme"
-import AuthProvider from "@/providers/AuthProvider"
-import { StyleSheet } from "react-native"
-import QueryProvider from "@/providers/QueryProvider"
+import { useColorScheme } from "@components/useColorScheme";
+import AuthProvider, { useAuth } from "@/components/providers/AuthProvider";
+import QueryProvider from "@/components/providers/QueryProvider";
+import NotificationProvider from "@/components/providers/NotificationProvider";
+import LockScreen from "@/components/ui/LockScreen";
+import OfflineBanner from "@/components/ui/feedback/OfflineBanner";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { initSentry } from "@/lib/sentry";
 
 export {
-  // Catch any errors thrown by the Layout component.
   ErrorBoundary,
-} from "expo-router"
+} from "expo-router";
+
+// Initialize Sentry
+initSentry();
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync()
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require("../../assets/fonts/SpaceMono-Regular.ttf"),
     ...FontAwesome.font,
-  })
+  });
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
-    if (error) throw error
-  }, [error])
+    if (error) throw error;
+  }, [error]);
 
   useEffect(() => {
     if (loaded) {
-      SplashScreen.hideAsync()
+      SplashScreen.hideAsync();
     }
-  }, [loaded])
+  }, [loaded]);
 
   if (!loaded) {
-    return null
+    return null;
   }
 
-  return <RootLayoutNav />
+  return <RootLayoutNav />;
 }
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme()
+  const colorScheme = useColorScheme();
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <AuthProvider>
-        <QueryProvider>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name='(auth)' />
-            <Stack.Screen name='(authenticated)/(tabs)' />
-          </Stack>
-        </QueryProvider>
-      </AuthProvider>
+      <QueryProvider>
+        <AuthProvider>
+          <NotificationProvider>
+            <NetworkStatusBanner />
+            <AuthGate>
+              <Stack screenOptions={{ headerShown: false }} testID="app-root">
+                <Stack.Screen name="(auth)" />
+                <Stack.Screen
+                  name="(authenticated)"
+                  options={{ title: "Navigation" }}
+                />
+              </Stack>
+            </AuthGate>
+          </NotificationProvider>
+        </AuthProvider>
+      </QueryProvider>
     </ThemeProvider>
-  )
+  );
 }
 
-const styles = StyleSheet.create({
-  backButton: {
-    padding: 8,
-  },
-})
+function AuthGate({ children }: PropsWithChildren) {
+  const { isLocked } = useAuth();
+
+  if (isLocked) {
+    return <LockScreen />;
+  }
+
+  return <>{children}</>;
+}
+
+function NetworkStatusBanner() {
+  const { isConnected } = useNetworkStatus();
+
+  if (isConnected === false) {
+    return <OfflineBanner />;
+  }
+
+  return null;
+}

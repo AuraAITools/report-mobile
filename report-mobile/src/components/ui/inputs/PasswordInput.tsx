@@ -17,6 +17,7 @@ interface PasswordInputProps {
   placeholder?: string
   title?: string
   containerStyle?: ViewStyle
+  testID?: string
 }
 
 const PasswordInput: React.FC<PasswordInputProps> = ({
@@ -26,6 +27,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
   value,
   showTitle = true,
   containerStyle,
+  testID,
 }) => {
   const [showPassword, setShowPassword] = useState(false)
 
@@ -49,6 +51,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
           onChangeText={onValueChange}
           secureTextEntry={!showPassword}
           autoCapitalize='none'
+          testID={testID}
         ></TextInput>
         <TouchableOpacity onPress={toggleShowPassword}>
           <Icon

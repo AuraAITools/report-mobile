@@ -1,61 +1,63 @@
-import React, { useState } from "react"
+import React, { useState } from "react";
 import {
   View,
   Text,
   TextInput,
   StyleSheet,
   TouchableOpacity,
-} from "react-native"
-import PasswordInput from "@/components/ui/inputs/PasswordInput"
-import GenericInput from "@/components/ui/inputs/GenericInput"
-import Divider from "@/components/ui/Divider"
-import LinkButton from "@/components/ui/LinkButton"
-import { useAuth } from "@/providers/AuthProvider"
+} from "react-native";
+import PasswordInput from "@/components/ui/inputs/PasswordInput";
+import GenericInput from "@/components/ui/inputs/GenericInput";
+import Divider from "@/components/ui/Divider";
+import LinkButton from "@/components/ui/LinkButton";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 const SignInScreen: React.FC = () => {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [registrationCode, setRegistrationCode] = useState("")
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [registrationCode, setRegistrationCode] = useState("");
   const auth = useAuth();
 
   const handleLogin = async () => {
     try {
-      await auth.loginUser()      
+      await auth.loginUser();
     } catch (error) {
-      console.error(`problem logging in`)
+      console.error(`problem logging in`);
     } finally {
-      setEmail("")
-      setPassword("")
+      setEmail("");
+      setPassword("");
     }
-  }
+  };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="sign-in-screen">
       <Text style={styles.title}>Better learning begins here.</Text>
       <View style={styles.placeholder} />
       <Text style={styles.subtitle}>Login to your Aura Learning account</Text>
       <GenericInput
         value={email}
         onValueChange={setEmail}
-        placeholder='Enter your registered email'
+        placeholder="Enter your registered email"
         showTitle={false}
         containerStyle={styles.input}
+        testID="email-input"
       />
       <PasswordInput
         onValueChange={setPassword}
         value={password}
-        placeholder='Enter your password'
+        placeholder="Enter your password"
         showTitle={false}
         containerStyle={styles.input}
+        testID="password-input"
       />
       <GenericInput
         value={registrationCode}
         onValueChange={setRegistrationCode}
-        placeholder='(Optional) Registration code'
+        placeholder="(Optional) Registration code"
         showTitle={false}
         containerStyle={styles.input}
       />
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
+      <TouchableOpacity style={styles.button} onPress={handleLogin} testID="sign-in-button">
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
       <View style={styles.footerContainer}>
@@ -66,23 +68,24 @@ const SignInScreen: React.FC = () => {
         </View>
         <View style={styles.linksContainer}>
           <LinkButton
-            href='/forgot-password'
-            label='I forgot my password'
+            href="/forgot-password"
+            label="I forgot my password"
             buttonStyle={styles.linkWrapper}
             textStyle={styles.linkText}
+            testID="forgot-password-link"
           />
           <Divider isVertical={true} />
           <LinkButton
-            href='/other-problem'
-            label='Other problems'
+            href="/other-problem"
+            label="Other problems"
             buttonStyle={styles.linkWrapper}
             textStyle={styles.linkText}
           />
         </View>
       </View>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -152,6 +155,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "gray",
   },
-})
+});
 
-export default SignInScreen
+export default SignInScreen;

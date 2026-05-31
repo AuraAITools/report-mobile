@@ -1,3 +1,5 @@
+import { env } from "@/utils/env";
+
 export const apiServiceConfig = {
-    url: process.env.REPORT_MS_API_URL!
-}
+  url: env.reportApiUrl,
+};

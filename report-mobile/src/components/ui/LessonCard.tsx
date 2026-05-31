@@ -1,31 +1,51 @@
-import { SubjectLesson } from "@/types/models/Subject"
-import { formatTimestampToDateString } from "@/util/DateTimeUtil"
-import { View, Text, TouchableOpacity, GestureResponderEvent, StyleSheet, Dimensions } from "react-native"
+import { SubjectLesson } from "@/types/models/Subject";
+import { formatTimestampToDateString } from "@/utils/DateTimeUtil";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  GestureResponderEvent,
+  StyleSheet,
+  Dimensions,
+} from "react-native";
 
-const { width, height } = Dimensions.get("window")
-type Theme = "blue" | "gray"
+const { width, height } = Dimensions.get("window");
+type Theme = "blue" | "gray";
 
 type Props = {
-  title: string
-  lesson: SubjectLesson
-  theme: Theme
-  handleLessonOnPress: (event: GestureResponderEvent) => void
-  buttonText: string
-}
+  title: string;
+  lesson: SubjectLesson;
+  theme: Theme;
+  handleLessonOnPress: (event: GestureResponderEvent) => void;
+  buttonText: string;
+  testID?: string;
+};
 
-const LessonCard: React.FC<Props> = ({ title, lesson, theme, handleLessonOnPress, buttonText }) => {
-  const styles = themeStyles[theme]
+const LessonCard: React.FC<Props> = ({
+  title,
+  lesson,
+  theme,
+  handleLessonOnPress,
+  buttonText,
+  testID,
+}) => {
+  const styles = themeStyles[theme];
   return (
-    <View style={styles.lessonCard}>
+    <View style={styles.lessonCard} testID={testID}>
       <Text style={styles.lessonTitle}>{title}</Text>
       <Text style={styles.lessonName}>{lesson.name}</Text>
-      <Text style={styles.lessonDate}>{formatTimestampToDateString(lesson.timestamp)}</Text>
-      <TouchableOpacity style={styles.lessonButton} onPress={handleLessonOnPress}>
+      <Text style={styles.lessonDate}>
+        {formatTimestampToDateString(lesson.timestamp)}
+      </Text>
+      <TouchableOpacity
+        style={styles.lessonButton}
+        onPress={handleLessonOnPress}
+      >
         <Text style={styles.lessonButtonText}>{buttonText}</Text>
       </TouchableOpacity>
     </View>
-  )
-}
+  );
+};
 
 const baseStyles = {
   lessonCard: {
@@ -56,7 +76,7 @@ const baseStyles = {
   lessonButtonText: {
     textAlign: "center" as "center",
   },
-}
+};
 
 const themeStyles = {
   blue: StyleSheet.create({
@@ -102,6 +122,6 @@ const themeStyles = {
     },
     lessonButtonText: baseStyles.lessonButtonText,
   }),
-}
+};
 
-export default LessonCard
+export default LessonCard;

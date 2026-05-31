@@ -131,3 +131,11 @@ dist
 
 # expo
 expo-env.d.ts
+.expo/
+
+# IDE / editor
+.idea/
+.vscode/
+
+# macOS
+.DS_Store

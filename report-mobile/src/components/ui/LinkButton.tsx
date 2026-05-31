@@ -15,6 +15,7 @@ interface LinkButtonProps {
   buttonStyle?: ViewStyle
   textStyle?: TextStyle
   linkStyle?: ViewStyle
+  testID?: string
 }
 
 const LinkButton: React.FC<LinkButtonProps> = ({
@@ -23,10 +24,11 @@ const LinkButton: React.FC<LinkButtonProps> = ({
   buttonStyle,
   textStyle,
   linkStyle,
+  testID,
 }) => {
   return (
     <Link href={href as Href<string>} style={linkStyle} asChild>
-      <TouchableOpacity style={{ ...styles.button, ...buttonStyle }}>
+      <TouchableOpacity style={{ ...styles.button, ...buttonStyle }} testID={testID}>
         <Text style={{ ...styles.buttonText, ...textStyle }}>{label}</Text>
       </TouchableOpacity>
     </Link>

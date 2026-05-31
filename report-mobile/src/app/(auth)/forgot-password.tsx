@@ -24,7 +24,7 @@ const ForgotPasswordScreen: React.FC = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="forgot-password-screen">
       <Text style={styles.header}>Reset your password</Text>
       <GenericInput
         onValueChange={setEmail}
@@ -33,8 +33,9 @@ const ForgotPasswordScreen: React.FC = () => {
         showTitle={false}
         keyboardType='email-address'
         containerStyle={styles.input}
+        testID="email-input"
       />
-      <TouchableOpacity onPress={handlePasswordReset} style={styles.button}>
+      <TouchableOpacity onPress={handlePasswordReset} style={styles.button} testID="reset-password-button">
         <Text style={styles.buttonText}>Send password reset link</Text>
       </TouchableOpacity>
     </View>

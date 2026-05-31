@@ -17,6 +17,7 @@ interface GenericInputProps {
   keyboardType?: KeyboardTypeOptions
   autoCapitalise?: "none" | "sentences" | "words" | "characters" | undefined
   containerStyle?: ViewStyle
+  testID?: string
 }
 
 const GenericInput: React.FC<GenericInputProps> = ({
@@ -28,6 +29,7 @@ const GenericInput: React.FC<GenericInputProps> = ({
   value,
   showTitle = true,
   containerStyle,
+  testID,
 }) => {
   return (
     <View style={{ ...styles.container, ...containerStyle }}>
@@ -45,6 +47,7 @@ const GenericInput: React.FC<GenericInputProps> = ({
           onChangeText={onValueChange}
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalise}
+          testID={testID}
         />
       </View>
     </View>

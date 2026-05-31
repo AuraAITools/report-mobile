@@ -2,14 +2,14 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { constmaxWidth, minWidth } from "@/constants/ScreenDimension";
 import Spacer from "@/components/ui/Spacer";
-import { useAuth } from "@/providers/AuthProvider";
+import { useAuth } from "@/components/providers/AuthProvider";
 import RegularButton from "@/components/ui/RegularButton";
 
 const SplashScreen: React.FC = () => {
   const auth = useAuth();
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="auth-home-screen">
       <Text style={styles.title}>Better Learning Begins Here</Text>
       <Text style={styles.subtitle}>Start using Aura Learning</Text>
       <View>
@@ -18,6 +18,7 @@ const SplashScreen: React.FC = () => {
           buttonStyle={styles.signInButton}
           textStyle={styles.signInButtonText}
           onPress={auth.loginUser}
+          testID="sign-in-button"
         />
         <Spacer />
       </View>

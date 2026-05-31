@@ -1,0 +1,55 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "ok": "OK",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "offline_banner": "You are offline. Some features may be unavailable."
+  },
+  "auth": {
+    "sign_in": "Sign In",
+    "sign_up": "Sign Up",
+    "forgot_password": "Forgot Password?",
+    "reset_password": "Reset Password",
+    "email": "Email",
+    "password": "Password",
+    "confirm_password": "Confirm Password",
+    "full_name": "Full Name",
+    "sign_out": "Sign Out",
+    "session_expired": "Your session has expired. Please sign in again.",
+    "unauthenticated": "You must be signed in to access this feature.",
+    "unauthorized": "You do not have permission to access this resource."
+  },
+  "lessons": {
+    "title": "Lessons",
+    "no_lessons": "No lessons available",
+    "lesson_details": "Lesson Details",
+    "upcoming": "Upcoming",
+    "completed": "Completed"
+  },
+  "progress": {
+    "title": "Progress",
+    "overall_progress": "Overall Progress",
+    "subject_progress": "Subject Progress"
+  },
+  "account": {
+    "title": "Account",
+    "settings": "Settings",
+    "notifications": "Notifications",
+    "biometric_unlock": "Biometric Unlock",
+    "language": "Language"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "lesson_reminders": "Lesson Reminders",
+    "progress_updates": "Progress Updates",
+    "messages": "Messages",
+    "announcements": "Announcements"
+  }
+}

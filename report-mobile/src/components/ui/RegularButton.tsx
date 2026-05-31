@@ -12,6 +12,7 @@ interface RegularButtonProps {
   onPress?: (event: GestureResponderEvent) => void;
   buttonStyle?: ViewStyle;
   textStyle?: TextStyle;
+  testID?: string;
 }
 
 const RegularButton: React.FC<RegularButtonProps> = ({
@@ -19,11 +20,13 @@ const RegularButton: React.FC<RegularButtonProps> = ({
   buttonStyle,
   textStyle,
   onPress,
+  testID,
 }) => {
   return (
     <TouchableOpacity
       style={{ ...styles.button, ...buttonStyle }}
       onPress={onPress}
+      testID={testID}
     >
       <Text style={{ ...styles.buttonText, ...textStyle }}>{label}</Text>
     </TouchableOpacity>

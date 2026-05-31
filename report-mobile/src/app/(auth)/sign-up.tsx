@@ -20,7 +20,7 @@ const SignUpScreen: React.FC = () => {
   const [getweeklySummary, setGetWeeklySummary] = useState(false);
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="sign-up-screen">
       <View style={styles.iconContainer}>
         <Text style={styles.icon}>{"✦"}</Text>
       </View>
@@ -31,6 +31,7 @@ const SignUpScreen: React.FC = () => {
         keyboardType={"email-address"}
         onValueChange={setEmail}
         value={email}
+        testID="email-input"
       />
       <Spacer height={8} />
       <PasswordInput
@@ -38,6 +39,7 @@ const SignUpScreen: React.FC = () => {
         placeholder="must be 8 characters"
         onValueChange={setPassword}
         value={password}
+        testID="password-input"
       />
       <Spacer height={8} />
       <PasswordInput
@@ -45,6 +47,7 @@ const SignUpScreen: React.FC = () => {
         placeholder="repeat password"
         onValueChange={setConfirmPassword}
         value={confirmPassword}
+        testID="confirm-password-input"
       />
       <View style={styles.switchContainer}>
         <CustomSwitch
@@ -76,6 +79,7 @@ const SignUpScreen: React.FC = () => {
           label="Log in"
           buttonStyle={styles.button}
           textStyle={styles.buttonText}
+          testID="submit-button"
         />
       </View>
       <Text style={styles.footerText}>

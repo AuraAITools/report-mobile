@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useAuth } from "@/providers/AuthProvider";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { Href, Redirect } from "expo-router";
 
 export default function Index() {
@@ -10,6 +10,6 @@ export default function Index() {
     return <Redirect href={`/(auth)/home` as Href<String>} />;
   }
 
-  console.debug(`authenticated. index redirecting to /(authenticated)/(tabs)/home`);
-  return <Redirect href={"/(authenticated)/(tabs)/home" as Href<String>} />;
+  console.debug(`authenticated. index redirecting to /(authenticated)`);
+  return <Redirect href={"/(authenticated)" as Href<String>} />;
 }
