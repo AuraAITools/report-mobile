@@ -5,7 +5,7 @@ import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
-} from "@react-navigation/native";
+} from "expo-router/react-navigation";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -63,7 +63,7 @@ function RootLayoutNav() {
           <NotificationProvider>
             <NetworkStatusBanner />
             <AuthGate>
-              <Stack screenOptions={{ headerShown: false }} testID="app-root">
+              <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="(auth)" />
                 <Stack.Screen
                   name="(authenticated)"

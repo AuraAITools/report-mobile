@@ -12,7 +12,7 @@ const AuthenticatedTabLayout = () => {
         name="index"
         options={{
           title: "Home",
-          tabBarTestID: "tab-home",
+          tabBarButtonTestID: "tab-home",
           tabBarIcon: ({ color, size }) => (
             <FontAwesome size={size} name="home" color={color} />
           ),
@@ -22,7 +22,7 @@ const AuthenticatedTabLayout = () => {
         name="lessons"
         options={{
           title: "Lessons",
-          tabBarTestID: "tab-lessons",
+          tabBarButtonTestID: "tab-lessons",
           tabBarIcon: ({ color, size }) => (
             <FontAwesome size={size} name="book" color={color} />
           ),
@@ -32,7 +32,7 @@ const AuthenticatedTabLayout = () => {
         name="progress"
         options={{
           title: "Progress",
-          tabBarTestID: "tab-progress",
+          tabBarButtonTestID: "tab-progress",
           tabBarIcon: ({ color, size }) => (
             <FontAwesome size={size} name="line-chart" color={color} />
           ),
@@ -42,7 +42,7 @@ const AuthenticatedTabLayout = () => {
         name="account"
         options={{
           title: "Account",
-          tabBarTestID: "tab-account",
+          tabBarButtonTestID: "tab-account",
           tabBarIcon: ({ color, size }) => (
             <FontAwesome size={size} name="user" color={color} />
           ),

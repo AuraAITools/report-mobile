@@ -2,6 +2,9 @@ import { env } from "@/utils/env";
 import Axios, { InternalAxiosRequestConfig, AxiosError } from "axios";
 import { AuraSecureStore } from "./secure-store";
 import { AccessTokenUtils } from "@/types/auth/AccessToken";
+import { getTokenRefresher, setTokenRefresher } from "./auth/token-refresher";
+
+export { setTokenRefresher };
 
 export const apiClient = Axios.create({
   baseURL: env.reportApiUrl,
@@ -25,13 +28,6 @@ const processQueue = (error: Error | null, token: string | null) => {
   failedQueue = [];
 };
 
-// Injected by AuthProvider at mount time
-let refreshTokenFn: (() => Promise<string | null>) | null = null;
-
-export function setTokenRefresher(fn: () => Promise<string | null>) {
-  refreshTokenFn = fn;
-}
-
 // --- Request interceptor: proactive refresh if token is near expiry ---
 async function authRequestInterceptor(config: InternalAxiosRequestConfig) {
   const store = AuraSecureStore.getInstance();
@@ -43,8 +39,9 @@ async function authRequestInterceptor(config: InternalAxiosRequestConfig) {
       const timeLeft = AccessTokenUtils.getTimeUntilExpiration(decoded);
 
       // Proactively refresh if less than 60 seconds remain
-      if (timeLeft < 60 && refreshTokenFn) {
-        const newToken = await refreshTokenFn();
+      const refresher = getTokenRefresher();
+      if (timeLeft < 60 && refresher) {
+        const newToken = await refresher();
         if (newToken) {
           token = newToken;
         }
@@ -97,10 +94,11 @@ apiClient.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      if (!refreshTokenFn) {
+      const refresher = getTokenRefresher();
+      if (!refresher) {
         throw new Error("No token refresher configured");
       }
-      const newToken = await refreshTokenFn();
+      const newToken = await refresher();
       if (!newToken) {
         throw new Error("Token refresh returned null");
       }

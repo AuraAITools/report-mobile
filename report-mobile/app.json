@@ -7,11 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "com.aura.report",
     "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./assets/images/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -45,6 +40,14 @@
       "expo-router",
       "expo-secure-store",
       "expo-local-authentication",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ],
       [
         "expo-notifications",
         {

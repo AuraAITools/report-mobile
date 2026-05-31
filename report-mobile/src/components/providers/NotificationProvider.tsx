@@ -35,8 +35,8 @@ function handleNotificationNavigation(
 
 export default function NotificationProvider({ children }: PropsWithChildren) {
   const router = useRouter();
-  const notificationListener = useRef<Notifications.Subscription>();
-  const responseListener = useRef<Notifications.Subscription>();
+  const notificationListener = useRef<Notifications.EventSubscription | null>(null);
+  const responseListener = useRef<Notifications.EventSubscription | null>(null);
 
   useTokenRefresh();
 
@@ -74,14 +74,8 @@ export default function NotificationProvider({ children }: PropsWithChildren) {
     });
 
     return () => {
-      if (notificationListener.current) {
-        Notifications.removeNotificationSubscription(
-          notificationListener.current
-        );
-      }
-      if (responseListener.current) {
-        Notifications.removeNotificationSubscription(responseListener.current);
-      }
+      notificationListener.current?.remove();
+      responseListener.current?.remove();
     };
   }, [router]);
 

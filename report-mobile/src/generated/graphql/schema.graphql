@@ -1,0 +1,1040 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+directive @ContainerSize(max: Int = 2147483647, message: String = "graphql.validation.ContainerSize.message", min: Int = 0) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+""" validation directives"""
+directive @Size(max: Int = 2147483647, message: String = "graphql.validation.Size.message", min: Int = 0) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+""" for pagination"""
+directive @connection on OBJECT
+
+"""This directive allows results to be deferred during execution"""
+directive @defer(
+  """Deferred behaviour is controlled by this argument"""
+  if: Boolean! = true
+  """A unique label that represents the fragment being deferred"""
+  label: String
+) on FRAGMENT_SPREAD | INLINE_FRAGMENT
+
+"""
+This directive disables error propagation when a non nullable field returns null for the given operation.
+"""
+directive @experimental_disableErrorPropagation on MUTATION | QUERY | SUBSCRIPTION
+
+enum AccountFeature {
+  EDUCATOR_FEATURE
+  PARENT_FEATURE
+  STAFF_FEATURE
+}
+
+"""
+Minimal projection of an account, used to populate audit fields (createdBy / updatedBy)
+on every Auditable response. Resolved lazily via @BatchMapping in
+AccountMinimalDetailGqlController.
+
+Only `userId` is guaranteed: it always reflects the Keycloak subject stored by
+AuditorAwareImpl. The remaining fields are resolved from the matching Account in
+the current tenant; they are null when no such Account exists (e.g. system-level
+audits, deleted accounts, or cross-tenant references).
+"""
+type AccountMinimalDetail {
+  accountId: ID
+  name: String
+  """
+  Presigned S3 GET URL for the account's profile image. Null if no image is set.
+  """
+  url: String
+  userId: ID!
+}
+
+"""
+Response from requestAccountProfileImageUpload — the client uses uploadUrl to PUT
+bytes directly to S3, then passes fileKey back to confirmAccountProfileImageUpload
+to validate dimensions/size and persist the key on the account.
+"""
+type AccountProfileImageUploadResponse {
+  fileKey: String!
+  uploadUrl: String!
+}
+
+type AccountResponse implements Auditable {
+  createdAt: Long!
+  createdBy: AccountMinimalDetail!
+  educatorFeatureEnabled: Boolean!
+  educators: [EducatorResponse!]!
+  firstName: String!
+  id: ID!
+  lastName: String!
+  parent: ParentResponse
+  parentFeatureEnabled: Boolean!
+  """
+  Presigned S3 GET URL for the account's profile image. Null if no image is set.
+  """
+  profileImageUrl: String
+  staffFeatureEnabled: Boolean!
+  status: AccountStatus!
+  students: [StudentResponse!]!
+  updatedAt: Long
+  updatedBy: AccountMinimalDetail
+  userId: ID!
+}
+
+enum AccountStatus {
+  ACTIVE
+  RETIRED
+  VERIFYING
+}
+
+input AccountStudentDetailsInput {
+  courseEnrollments: [StudentCourseEnrollmentInput!]!
+  dateOfBirth: Date!
+  email: String!
+  levelId: ID!
+  name: String!
+  schoolId: ID!
+}
+
+interface Auditable {
+  createdAt: Long!
+  createdBy: AccountMinimalDetail!
+  updatedAt: Long
+  updatedBy: AccountMinimalDetail
+}
+
+input ConfirmAccountProfileImageUploadInput {
+  accountId: ID!
+  """
+  The fileKey returned from requestAccountProfileImageUpload, after the PUT completes.
+  """
+  fileKey: String!
+  institutionId: ID!
+}
+
+input ConfirmInstitutionProfileImageUploadInput {
+  """
+  The fileKey returned from requestInstitutionProfileImageUpload, after the PUT completes.
+  """
+  fileKey: String!
+  institutionId: ID!
+}
+
+input ConfirmParentProfileImageUploadInput {
+  """
+  The fileKey returned from requestParentProfileImageUpload, after the PUT completes.
+  """
+  fileKey: String!
+  institutionId: ID!
+  parentId: ID!
+}
+
+input ConfirmStudentProfileImageUploadInput {
+  """
+  The fileKey returned from requestStudentProfileImageUpload, after the PUT completes.
+  """
+  fileKey: String!
+  institutionId: ID!
+  studentId: ID!
+}
+
+type CourseResponse implements Auditable {
+  courseEndTimestamptz: Long!
+  courseStartTimestamptz: Long!
+  createdAt: Long!
+  createdBy: AccountMinimalDetail!
+  educators: [EducatorResponse!]!
+  id: ID!
+  lessonFrequency: LessonFrequency!
+  lessons: [LessonResponse!]!
+  level: LevelResponse
+  maxSize: Int!
+  name: String!
+  priceRecord: PriceRecordResponse
+  students: [StudentResponse!]!
+  subjects: [SubjectResponse!]!
+  updatedAt: Long
+  updatedBy: AccountMinimalDetail
+}
+
+input CreateAccountInput {
+  contact: Int!
+  email: String!
+  firstName: String!
+  institutionId: ID!
+  lastName: String!
+}
+
+input CreateCourseInput {
+  courseEndTimestamptz: DateTime!
+  courseStartTimestamptz: DateTime!
+  educatorIds: [ID!]!
+  institutionId: ID!
+  lessonFrequency: LessonFrequency!
+  levelId: ID
+  maxSize: Int!
+  name: String!
+  outletId: ID!
+  priceRecord: CreatePriceRecordInput!
+  studentIds: [ID!]!
+  subjectIds: [ID!]!
+}
+
+input CreateEducatorInput {
+  accountId: ID!
+  courseIds: [ID!]!
+  dateOfBirth: Date!
+  email: String!
+  employmentType: EmploymentType!
+  institutionId: ID!
+  levelIds: [ID!]!
+  name: String!
+  outletIds: [ID!]!
+  startDate: Date!
+  subjectIds: [ID!]!
+}
+
+input CreateEducatorsInput {
+  educators: [CreateEducatorInput!]!
+  institutionId: ID!
+}
+
+input CreateInstitutionInput {
+  address: String!
+  contactNumber: String!
+  email: String!
+  name: String!
+  uen: String!
+}
+
+input CreateLessonInCourseInput {
+  courseId: ID!
+  description: String
+  educatorIds: [ID!]!
+  institutionId: ID!
+  lessonEndTimestamptz: DateTime!
+  lessonPlans: [CreateLessonPlanForLessonInput!]!
+  lessonStartTimestamptz: DateTime!
+  levelIds: [ID!]!
+  name: String!
+  outletRoomId: ID
+  studentIds: [ID!]!
+  subjectIds: [ID!]!
+  topicIds: [ID!]!
+}
+
+input CreateLessonObjectiveInLessonPlanInput {
+  name: String!
+  objective: String!
+  topicIds: [ID!]!
+}
+
+input CreateLessonObjectiveInput {
+  institutionId: ID!
+  lessonId: ID!
+  lessonPlanId: ID!
+  name: String!
+  objective: String!
+  topicIds: [ID!]!
+}
+
+input CreateLessonPlanForLessonInput {
+  lessonObjectives: [CreateLessonObjectiveInLessonPlanInput!]!
+  materialIds: [ID!]!
+  plan: String!
+  studentIds: [ID!]!
+  topicIds: [ID!]!
+}
+
+input CreateLessonPlanInLessonInput {
+  lessonId: ID!
+  lessonObjectives: [CreateLessonObjectiveInLessonPlanInput!]!
+  materialIds: [ID!]!
+  plan: String!
+  studentIds: [ID!]!
+  topicIds: [ID!]!
+}
+
+input CreateLevelInInstitutionInput {
+  category: SCHOOL_CATEGORY!
+  institutionId: ID!
+  name: String!
+}
+
+input CreateMaterialInInstitutionInput {
+  description: String
+  """
+  Set to the fileKey returned by requestMaterialUpload if a file was uploaded. Omit for materials without a file.
+  """
+  fileKey: String
+  institutionId: ID!
+  name: String!
+  """Topics to link the material to. Pass an empty list for no links."""
+  topicIds: [ID!]!
+}
+
+input CreateOutletInput {
+  address: String!
+  contactNumber: Int!
+  description: String!
+  email: String!
+  institutionId: ID!
+  name: String!
+  postalCode: Int!
+}
+
+input CreateOutletRoomInput {
+  description: String
+  details: String
+  fileUrl: String
+  institutionId: ID!
+  name: String!
+  outletId: ID!
+  passcode: String
+  size: Int!
+  type: OutletRoomType!
+  url: String
+}
+
+input CreateParentAndStudentsInAccountInput {
+  accountId: ID!
+  institutionId: ID!
+  relationship: RELATIONSHIP!
+  students: [AccountStudentDetailsInput!]!
+}
+
+type CreateParentAndStudentsInAccountResponse {
+  parent: ParentResponse!
+  students: [StudentResponse!]!
+}
+
+input CreateParentInAccountInput {
+  accountId: ID!
+  institutionId: ID!
+  relationship: RELATIONSHIP!
+}
+
+input CreatePriceRecordInput {
+  frequency: PriceFrequency!
+  price: Float!
+}
+
+input CreateSchoolInput {
+  institutionId: ID!
+  name: String!
+  schoolCategory: SchoolCategory!
+}
+
+input CreateStudentInput {
+  accountId: ID!
+  courseEnrollments: [StudentCourseEnrollmentInput!]!
+  dateOfBirth: Date!
+  email: String!
+  institutionId: ID!
+  levelId: ID!
+  name: String!
+  schoolId: ID!
+}
+
+input CreateStudentsInput {
+  institutionId: ID!
+  students: [CreateStudentInput!]!
+}
+
+input CreateSubjectInput {
+  institutionId: ID!
+  name: String!
+}
+
+input CreateSubjectTopicLinksInput {
+  id: ID!
+  institutionId: ID!
+  topicIds: [ID!]!
+}
+
+"""An RFC-3339 compliant Full Date Scalar"""
+scalar Date
+
+"""A slightly refined version of RFC-3339 compliant DateTime Scalar"""
+scalar DateTime
+
+input DeleteEducatorByIdInput {
+  id: ID!
+  institutionId: ID!
+}
+
+input DeleteLessonObjectiveByIdInput {
+  id: ID!
+  institutionId: ID!
+  lessonId: ID!
+}
+
+input DeleteMaterialByIdInput {
+  institutionId: ID!
+  materialId: ID!
+}
+
+input DeleteOutletRoomByIdInput {
+  id: ID!
+  institutionId: ID!
+}
+
+input DeleteParentByIdInput {
+  id: ID!
+  institutionId: ID!
+}
+
+input DeleteSchoolInInstitutionInput {
+  institutionId: ID!
+  schoolId: ID!
+}
+
+input DeleteStudentByIdInput {
+  id: ID!
+  institutionId: ID!
+}
+
+type EducatorResponse implements Auditable {
+  account: AccountResponse!
+  courses: [CourseResponse!]!
+  createdAt: Long!
+  createdBy: AccountMinimalDetail!
+  dateOfBirth: Date!
+  email: String!
+  employmentType: EmploymentType!
+  id: ID!
+  levels: [LevelResponse!]!
+  name: String!
+  outlets: [OutletResponse!]!
+  startDate: Date!
+  subjects: [SubjectResponse!]!
+  updatedAt: Long
+  updatedBy: AccountMinimalDetail
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+}
+
+input EnableAccountFeatureInput {
+  accountId: ID!
+  feature: AccountFeature!
+  institutionId: ID!
+}
+
+input GetEducatorByIdInput {
+  id: ID!
+  institutionId: ID!
+}
+
+input GetParentByIdInput {
+  id: ID!
+  institutionId: ID!
+}
+
+input GetStudentByIdInput {
+  id: ID!
+  institutionId: ID!
+}
+
+input GrantUserGroupRoleInput {
+  role: UserGroupRole!
+  userGroupId: ID!
+  userGroupType: UserGroupType!
+  userId: ID!
+}
+
+"""
+Response from requestInstitutionProfileImageUpload — the client uses uploadUrl to PUT
+bytes directly to S3, then passes fileKey back to confirmInstitutionProfileImageUpload
+to validate dimensions/size and persist the key on the institution.
+"""
+type InstitutionProfileImageUploadResponse {
+  fileKey: String!
+  uploadUrl: String!
+}
+
+type InstitutionResponse implements Auditable {
+  address: String!
+  contactNumber: String!
+  createdAt: Long!
+  createdBy: AccountMinimalDetail!
+  email: String!
+  id: ID!
+  logoUrl: String
+  name: String!
+  outlets: [OutletResponse!]!
+  """
+  Presigned S3 GET URL for the institution's profile image. Null if no image is set.
+  """
+  profileImageUrl: String
+  state: InstitutionState!
+  uen: String!
+  updatedAt: Long
+  updatedBy: AccountMinimalDetail
+}
+
+input InstitutionSearchInput {
+  address: String
+  contactNumber: String
+  createdAt: Long
+  email: String
+  name: String
+  uen: String
+  updatedAt: Long
+}
+
+enum InstitutionState {
+  ACTIVE
+  INACTIVE
+  PENDING
+}
+
+enum LessonFrequency {
+  FORTNIGHTLY
+  MONTHLY
+  WEEKLY
+}
+
+type LessonObjectiveResponse implements Auditable {
+  createdAt: Long!
+  createdBy: AccountMinimalDetail!
+  id: ID!
+  lessonPlanId: ID!
+  name: String!
+  objective: String!
+  updatedAt: Long
+  updatedBy: AccountMinimalDetail
+}
+
+type LessonPlanResponse implements Auditable {
+  createdAt: Long!
+  createdBy: AccountMinimalDetail!
+  id: ID!
+  lesson: LessonResponse!
+  plan: String!
+  state: LessonPlanState!
+  topics: [TopicResponse!]!
+  updatedAt: Long
+  updatedBy: AccountMinimalDetail
+}
+
+enum LessonPlanState {
+  DRAFT
+  PLANNED
+  UNPLANNED
+}
+
+type LessonResponse implements Auditable {
+  course: CourseResponse!
+  createdAt: Long!
+  createdBy: AccountMinimalDetail!
+  description: String
+  educators: [EducatorResponse!]!
+  id: ID!
+  lessonEndTimestamptz: Long!
+  lessonObjectives: [LessonObjectiveResponse!]!
+  lessonPlans: [LessonPlanResponse!]!
+  lessonStartTimestamptz: Long!
+  levels: [LevelResponse!]!
+  materials: [MaterialResponse!]!
+  name: String!
+  outlet: OutletResponse!
+  outletRoom: OutletRoomResponse
+  recap: String
+  state: LessonState!
+  students: [StudentResponse!]!
+  subjects: [SubjectResponse!]!
+  topics: [TopicResponse!]!
+  updatedAt: Long
+  updatedBy: AccountMinimalDetail
+}
+
+enum LessonState {
+  CANCELLED
+  CREATED
+  ENDED
+}
+
+type LevelResponse implements Auditable {
+  category: SCHOOL_CATEGORY!
+  createdAt: Long!
+  createdBy: AccountMinimalDetail!
+  id: ID!
+  name: String!
+  updatedAt: Long
+  updatedBy: AccountMinimalDetail
+}
+
+type LevelResponseConnection {
+  edges: [LevelResponseEdge]
+  pageInfo: PageInfo!
+}
+
+type LevelResponseEdge {
+  cursor: String!
+  node: LevelResponse!
+}
+
+input LevelSearchInput {
+  createdAt: Long
+  createdBy: ID
+  name: String
+  updatedAt: Long
+  updatedBy: ID
+}
+
+"""A 64-bit signed integer"""
+scalar Long
+
+type MaterialResponse implements Auditable {
+  createdAt: Long!
+  createdBy: AccountMinimalDetail!
+  description: String
+  """
+  Presigned S3 GET URL for the material file. Null if the material has no file.
+  """
+  fileUrl: String
+  id: ID!
+  name: String!
+  updatedAt: Long
+  updatedBy: AccountMinimalDetail
+}
+
+"""
+Response from requestMaterialUpload — the client uses uploadUrl to PUT bytes
+directly to S3, then passes fileKey back to createMaterialInInstitution to
+persist the material once the upload completes.
+"""
+type MaterialUploadResponse {
+  fileKey: String!
+  uploadUrl: String!
+}
+
+type Mutation {
+  confirmAccountProfileImageUpload(input: ConfirmAccountProfileImageUploadInput!): AccountResponse!
+  confirmInstitutionProfileImageUpload(input: ConfirmInstitutionProfileImageUploadInput!): InstitutionResponse!
+  confirmParentProfileImageUpload(input: ConfirmParentProfileImageUploadInput!): ParentResponse!
+  confirmStudentProfileImageUpload(input: ConfirmStudentProfileImageUploadInput!): StudentResponse!
+  createAccount(createAccountInput: CreateAccountInput!): AccountResponse!
+  createCourse(createCourseInput: CreateCourseInput!): CourseResponse!
+  createEducatorsInAccount(createEducatorsInput: CreateEducatorsInput!): [EducatorResponse!]!
+  createInstitution(createInstitutionInput: CreateInstitutionInput!): InstitutionResponse!
+  createLessonInCourse(createLessonInCourse: CreateLessonInCourseInput!): LessonResponse!
+  createLessonPlanInLesson(input: CreateLessonPlanInLessonInput!): LessonPlanResponse!
+  createLevelInInstitution(input: CreateLevelInInstitutionInput!): LevelResponse!
+  createMaterialInInstitution(input: CreateMaterialInInstitutionInput!): MaterialResponse!
+  createOutlet(createOutletInput: CreateOutletInput!): OutletResponse!
+  createOutletRoom(createOutletRoomInput: CreateOutletRoomInput!): OutletRoomResponse!
+  createParentAndStudentsInAccount(createParentAndStudentsInAccountInput: CreateParentAndStudentsInAccountInput!): CreateParentAndStudentsInAccountResponse!
+  createParentInAccount(createParentInAccountInput: CreateParentInAccountInput!): ParentResponse!
+  createSchoolInInstitution(createSchoolInput: CreateSchoolInput!): SchoolResponse!
+  createStudentsInAccount(createStudentsInput: CreateStudentsInput!): [StudentResponse!]!
+  createSubject(createSubjectInput: CreateSubjectInput!): SubjectResponse!
+  createSubjectTopicLinks(createSubjectTopicLinksInput: CreateSubjectTopicLinksInput!): SubjectResponseWithTopics!
+  createTopic(topicInput: TopicInput!): TopicResponse!
+  deleteCourseById(id: ID!): Boolean!
+  deleteEducatorById(input: DeleteEducatorByIdInput!): Boolean!
+  deleteLessonById(id: ID!): Boolean!
+  deleteLevelById(id: ID!): Boolean!
+  deleteMaterialById(deleteMaterialByIdInput: DeleteMaterialByIdInput!): Boolean!
+  deleteOutletById(id: ID!): Boolean!
+  deleteOutletRoomById(deleteOutletRoomByIdInput: DeleteOutletRoomByIdInput!): Boolean!
+  deleteParentById(input: DeleteParentByIdInput!): Boolean!
+  deleteSchoolInInstitution(deleteSchoolInInstitutionInput: DeleteSchoolInInstitutionInput!): Boolean!
+  deleteStudentById(input: DeleteStudentByIdInput!): Boolean!
+  deleteSubjectById(id: ID!): Boolean!
+  deleteTopicById(id: ID!): Boolean!
+  enableAccountFeature(enableAccountFeatureInput: EnableAccountFeatureInput!): AccountResponse!
+  grantUserGroupRole(input: GrantUserGroupRoleInput!): Boolean!
+  requestAccountProfileImageUpload(input: RequestAccountProfileImageUploadInput!): AccountProfileImageUploadResponse!
+  requestInstitutionProfileImageUpload(input: RequestInstitutionProfileImageUploadInput!): InstitutionProfileImageUploadResponse!
+  requestMaterialUpload(input: RequestMaterialUploadInput!): MaterialUploadResponse!
+  requestParentProfileImageUpload(input: RequestParentProfileImageUploadInput!): ParentProfileImageUploadResponse!
+  requestStudentProfileImageUpload(input: RequestStudentProfileImageUploadInput!): StudentProfileImageUploadResponse!
+  revokeUserGroupRole(input: RevokeUserGroupRoleInput!): Boolean!
+  updateEducatorById(input: UpdateEducatorByIdInput!): EducatorResponse!
+  updateOutlet(updateOutletInput: UpdateOutletInput!): OutletResponse!
+  updateOutletRoom(updateOutletRoomInput: UpdateOutletRoomInput!): OutletRoomResponse!
+  updateParentById(input: UpdateParentByIdInput!): ParentResponse!
+  updateStudentById(input: UpdateStudentByIdInput!): StudentResponse!
+}
+
+type OutletResponse implements Auditable {
+  address: String!
+  contactNumber: Int!
+  createdAt: Long!
+  createdBy: AccountMinimalDetail!
+  description: String!
+  email: String!
+  id: ID!
+  name: String!
+  postalCode: Int!
+  updatedAt: Long
+  updatedBy: AccountMinimalDetail
+}
+
+type OutletResponseConnection {
+  edges: [OutletResponseEdge]
+  pageInfo: PageInfo!
+}
+
+type OutletResponseEdge {
+  cursor: String!
+  node: OutletResponse!
+}
+
+type OutletRoomResponse implements Auditable {
+  createdAt: Long!
+  createdBy: AccountMinimalDetail!
+  description: String
+  details: String
+  fileUrl: String
+  id: ID!
+  name: String!
+  outletId: ID!
+  passcode: String
+  size: Int!
+  type: OutletRoomType!
+  updatedAt: Long
+  updatedBy: AccountMinimalDetail
+  url: String
+}
+
+enum OutletRoomType {
+  PHYSICAL
+  VIRTUAL
+}
+
+input OutletSearchInput {
+  address: String
+  contactNumber: String
+  createdAt: Long
+  createdBy: ID
+  description: String
+  email: String
+  name: String
+  postalCode: String
+  updatedAt: Long
+  updatedBy: ID
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+"""
+Response from requestParentProfileImageUpload — the client uses uploadUrl to PUT bytes
+directly to S3, then passes fileKey back to confirmParentProfileImageUpload to
+validate dimensions/size and persist the key on the parent.
+"""
+type ParentProfileImageUploadResponse {
+  fileKey: String!
+  uploadUrl: String!
+}
+
+type ParentResponse implements Auditable {
+  createdAt: Long!
+  createdBy: AccountMinimalDetail!
+  id: ID!
+  """
+  Presigned S3 GET URL for the parent's profile image. Null if no image is set.
+  """
+  profileImageUrl: String
+  relationship: RELATIONSHIP!
+  updatedAt: Long
+  updatedBy: AccountMinimalDetail
+}
+
+enum PriceFrequency {
+  MONTHLY
+  PER_LESSON
+  TOTAL
+  WEEKLY
+}
+
+type PriceRecordResponse {
+  createdAt: Long!
+  createdBy: AccountMinimalDetail!
+  frequency: PriceFrequency!
+  id: ID!
+  price: Float!
+  updatedAt: Long
+  updatedBy: AccountMinimalDetail
+}
+
+type Query {
+  getAccountById(accountId: ID!): AccountResponse!
+  getAllAccountsInInstitution(institutionId: ID!): [AccountResponse!]!
+  getAllCoursesInOutlet(outletId: ID!): [CourseResponse!]!
+  getAllEducatorsInInstitution(institutionId: ID!): [EducatorResponse!]!
+  getAllLessonsInCourse(courseId: ID!): [LessonResponse!]!
+  getAllLessonsInOutlet(outletId: ID!): [LessonResponse!]!
+  getAllOutletRoomsByIds(ids: [ID!]!, institutionId: ID!): [OutletRoomResponse!]!
+  getAllOutletRoomsInInstitution(institutionId: ID!): [OutletRoomResponse!]!
+  getAllOutletRoomsInOutlet(institutionId: ID!, outletId: ID!): [OutletRoomResponse!]!
+  getAllParentsInInstitution(institutionId: ID!): [ParentResponse!]!
+  getAllStudentsInInstitution(institutionId: ID!): [StudentResponse!]!
+  getAllSubjectsInInstitution(institutionId: ID!): [SubjectResponse!]!
+  getAllTopicsInInstitution(institutionId: ID!): [TopicResponse!]!
+  getCourseById(courseId: ID!): CourseResponse!
+  getEducatorById(input: GetEducatorByIdInput!): EducatorResponse!
+  getInstitution(institutionId: ID!): InstitutionResponse!
+  getInstitutionsByIds(institutionIds: [ID!]!): [InstitutionResponse!]!
+  getLessonById(lessonId: ID!): LessonResponse!
+  getLevelByIdInInstitution(institutionId: ID!, levelId: ID!): LevelResponse!
+  getLevelByPage(after: String, before: String, first: Int, institutionId: ID!, last: Int, search: LevelSearchInput, sort: SortInput): LevelResponseConnection!
+  getLevelsInInstitution(institutionId: ID!): [LevelResponse!]!
+  getMaterialById(institutionId: ID!, materialId: ID!): MaterialResponse!
+  getMaterialsInInstitution(institutionId: ID!): [MaterialResponse!]!
+  getOutletsByPage(after: String, before: String, first: Int, institutionId: ID!, last: Int, search: OutletSearchInput, sort: SortInput): OutletResponseConnection!
+  getOutletsInInstitution(institutionId: ID!): [OutletResponse!]!
+  getParentById(input: GetParentByIdInput!): ParentResponse!
+  getSchoolsInInstitution(institutionId: ID!): [SchoolResponse!]!
+  getStudentById(input: GetStudentByIdInput!): StudentResponse!
+  getSubjectById(subjectId: ID!): SubjectResponse!
+  getTopicById(topicId: ID!): TopicResponse!
+  lookupPermissions: UserPermissions!
+}
+
+enum RELATIONSHIP {
+  PARENT
+  SELF
+}
+
+input RequestAccountProfileImageUploadInput {
+  accountId: ID!
+  """Must be one of: image/png, image/jpeg, image/webp."""
+  contentType: String!
+  institutionId: ID!
+}
+
+input RequestInstitutionProfileImageUploadInput {
+  """Must be one of: image/png, image/jpeg, image/webp."""
+  contentType: String!
+  institutionId: ID!
+}
+
+input RequestMaterialUploadInput {
+  contentType: String!
+  institutionId: ID!
+}
+
+input RequestParentProfileImageUploadInput {
+  """Must be one of: image/png, image/jpeg, image/webp."""
+  contentType: String!
+  institutionId: ID!
+  parentId: ID!
+}
+
+input RequestStudentProfileImageUploadInput {
+  """Must be one of: image/png, image/jpeg, image/webp."""
+  contentType: String!
+  institutionId: ID!
+  studentId: ID!
+}
+
+type ResourcePermissions {
+  permissions: [String!]!
+  resourceId: String!
+  resourceType: String!
+}
+
+input RevokeUserGroupRoleInput {
+  role: UserGroupRole!
+  userGroupId: ID!
+  userGroupType: UserGroupType!
+  userId: ID!
+}
+
+enum SCHOOL_CATEGORY {
+  ARTS
+  INTERNATIONAL
+  JUNIOR_COLLEGE
+  POLYTECHNIC
+  PRIMARY
+  SECONDARY
+  TECHNICAL
+  UNIVERSITY
+}
+
+enum SchoolCategory {
+  ARTS
+  INTERNATIONAL
+  JUNIOR_COLLEGE
+  POLYTECHNIC
+  PRIMARY
+  SECONDARY
+  TECHNICAL
+  UNIVERSITY
+}
+
+type SchoolResponse implements Auditable {
+  createdAt: Long!
+  createdBy: AccountMinimalDetail!
+  id: ID!
+  name: String!
+  schoolCategory: SchoolCategory!
+  updatedAt: Long
+  updatedBy: AccountMinimalDetail
+}
+
+enum SortDirection {
+  ASCENDING
+  DESCENDING
+}
+
+input SortInput {
+  direction: SortDirection!
+  field: String!
+}
+
+input StudentCourseEnrollmentInput {
+  courseId: ID!
+  startDate: Date!
+}
+
+"""
+Response from requestStudentProfileImageUpload — the client uses uploadUrl to PUT bytes
+directly to S3, then passes fileKey back to confirmStudentProfileImageUpload to
+validate dimensions/size and persist the key on the student.
+"""
+type StudentProfileImageUploadResponse {
+  fileKey: String!
+  uploadUrl: String!
+}
+
+type StudentResponse implements Auditable {
+  courses: [CourseResponse!]!
+  createdAt: Long!
+  createdBy: AccountMinimalDetail!
+  dateOfBirth: Date!
+  email: String!
+  id: ID!
+  level: LevelResponse!
+  name: String!
+  """
+  Presigned S3 GET URL for the student's profile image. Null if no image is set.
+  """
+  profileImageUrl: String
+  school: SchoolResponse!
+  updatedAt: Long
+  updatedBy: AccountMinimalDetail
+}
+
+type SubjectResponse implements Auditable {
+  createdAt: Long!
+  createdBy: AccountMinimalDetail!
+  id: ID!
+  name: String!
+  topics: [TopicResponse!]!
+  updatedAt: Long
+  updatedBy: AccountMinimalDetail
+}
+
+type SubjectResponseWithTopics {
+  createdAt: Long!
+  createdBy: AccountMinimalDetail!
+  id: ID!
+  name: String!
+  topics: [TopicResponse!]!
+  updatedAt: Long
+  updatedBy: AccountMinimalDetail
+}
+
+input TopicInput {
+  institutionId: ID!
+  name: String!
+}
+
+type TopicResponse implements Auditable {
+  createdAt: Long!
+  createdBy: AccountMinimalDetail!
+  id: ID!
+  name: String!
+  updatedAt: Long
+  updatedBy: AccountMinimalDetail
+}
+
+input UpdateEducatorByIdInput {
+  dateOfBirth: Date
+  email: String
+  employmentType: EmploymentType
+  id: ID!
+  institutionId: ID!
+  name: String
+  startDate: Date
+}
+
+input UpdateLessonObjectiveInput {
+  id: ID!
+  institutionId: ID!
+  lessonId: ID!
+  name: String!
+  objective: String!
+  topicIds: [ID!]!
+}
+
+input UpdateOutletInput {
+  address: String!
+  contactNumber: Int!
+  description: String!
+  email: String!
+  id: ID!
+  institutionId: ID!
+  name: String!
+  postalCode: Int!
+}
+
+input UpdateOutletRoomInput {
+  description: String
+  details: String
+  fileUrl: String
+  id: ID!
+  institutionId: ID!
+  name: String!
+  passcode: String
+  size: Int!
+  type: OutletRoomType!
+  url: String
+}
+
+input UpdateParentByIdInput {
+  id: ID!
+  institutionId: ID!
+  relationship: RELATIONSHIP
+}
+
+input UpdateStudentByIdInput {
+  dateOfBirth: Date
+  email: String
+  id: ID!
+  institutionId: ID!
+  name: String
+}
+
+enum UserGroupRole {
+  ADMIN
+  GROUP_ADMIN
+  GROUP_VIEWER
+  MODIFIER
+  VIEWER
+}
+
+enum UserGroupType {
+  ACCOUNT_USER_GROUP
+  COURSE_USER_GROUP
+  INSTITUTION_USER_GROUP
+  LESSON_USER_GROUP
+  OUTLET_USER_GROUP
+  SYSTEM_USER_GROUP
+}
+
+type UserPermissions {
+  permissions: [ResourcePermissions!]!
+}
