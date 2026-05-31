@@ -1002,6 +1002,7 @@ export type PriceRecordResponse = {
 export type Query = {
   __typename?: 'Query';
   getAccountById: AccountResponse;
+  getAccountByUserId: AccountResponse;
   getAllAccountsInInstitution: Array<AccountResponse>;
   getAllCoursesInOutlet: Array<CourseResponse>;
   getAllEducatorsInInstitution: Array<EducatorResponse>;
@@ -1037,6 +1038,12 @@ export type Query = {
 
 export type QueryGetAccountByIdArgs = {
   accountId: Scalars['ID']['input'];
+};
+
+
+export type QueryGetAccountByUserIdArgs = {
+  institutionId: Scalars['ID']['input'];
+  userId: Scalars['ID']['input'];
 };
 
 

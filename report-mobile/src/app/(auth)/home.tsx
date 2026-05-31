@@ -1,66 +1,32 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { constmaxWidth, minWidth } from "@/constants/ScreenDimension";
-import Spacer from "@/components/ui/Spacer";
+import { View } from "react-native";
 import { useAuth } from "@/components/providers/AuthProvider";
-import RegularButton from "@/components/ui/RegularButton";
+import { Button } from "@/components/ui/button";
+import { Text } from "@/components/ui/text";
 
 const SplashScreen: React.FC = () => {
   const auth = useAuth();
 
   return (
-    <View style={styles.container} testID="auth-home-screen">
-      <Text style={styles.title}>Better Learning Begins Here</Text>
-      <Text style={styles.subtitle}>Start using Aura Learning</Text>
-      <View>
-        <RegularButton
-          label="Sign In"
-          buttonStyle={styles.signInButton}
-          textStyle={styles.signInButtonText}
-          onPress={auth.loginUser}
-          testID="sign-in-button"
-        />
-        <Spacer />
-      </View>
+    <View
+      className="flex-1 items-center justify-center bg-background p-4"
+      testID="auth-home-screen"
+    >
+      <Text variant="h1" className="mb-5 w-4/5 shrink text-center">
+        Better Learning Begins Here
+      </Text>
+      <Text className="mb-6 text-center text-base text-foreground/70">
+        Start using Aura Learning
+      </Text>
+      <Button
+        onPress={auth.loginUser}
+        className="w-64 max-w-sm"
+        testID="sign-in-button"
+      >
+        <Text>Sign In</Text>
+      </Button>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 16,
-    backgroundColor: "#fff",
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "800",
-    textAlign: "center",
-    marginBottom: 20,
-    width: "80%",
-    flexShrink: 1,
-  },
-  subtitle: {
-    fontSize: 17,
-    color: "#000000",
-    opacity: 0.7,
-    textAlign: "center",
-    marginBottom: 24,
-  },
-  signInButton: {
-    minWidth: minWidth,
-    maxWidth: constmaxWidth,
-    backgroundColor: "#000000",
-    paddingVertical: 13,
-    borderRadius: 8,
-  },
-  signInButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});
 
 export default SplashScreen;

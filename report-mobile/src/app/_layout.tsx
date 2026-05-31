@@ -1,17 +1,14 @@
 import "@/global.css";
 import "@/i18n";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "expo-router/react-navigation";
+import { ThemeProvider } from "expo-router/react-navigation";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { PropsWithChildren, useEffect } from "react";
 
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { PortalHost } from "@rn-primitives/portal";
 import { useColorScheme } from "@components/useColorScheme";
 import AuthProvider, { useAuth } from "@/components/providers/AuthProvider";
 import QueryProvider from "@/components/providers/QueryProvider";
@@ -20,6 +17,7 @@ import LockScreen from "@/components/ui/LockScreen";
 import OfflineBanner from "@/components/ui/feedback/OfflineBanner";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { initSentry } from "@/lib/sentry";
+import { NAV_THEME } from "@/lib/theme";
 
 export {
   ErrorBoundary,
@@ -59,7 +57,9 @@ function RootLayoutNav() {
 
   return (
     <SafeAreaProvider>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <ThemeProvider
+        value={colorScheme === "dark" ? NAV_THEME.dark : NAV_THEME.light}
+      >
         <QueryProvider>
           <AuthProvider>
             <NotificationProvider>
@@ -77,6 +77,7 @@ function RootLayoutNav() {
           </AuthProvider>
         </QueryProvider>
       </ThemeProvider>
+      <PortalHost />
     </SafeAreaProvider>
   );
 }

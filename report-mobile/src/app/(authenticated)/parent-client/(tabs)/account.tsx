@@ -1,48 +1,26 @@
-import RegularButton from "@/components/ui/RegularButton";
-import { useAuth } from "@/components/providers/AuthProvider";
-import { View, Text, StyleSheet } from "react-native";
+import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { constmaxWidth, minWidth } from "@/constants/ScreenDimension";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { Button } from "@/components/ui/button";
+import { Text } from "@/components/ui/text";
 
 export default function AccountScreen() {
   const { logoutUser } = useAuth();
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
-      <View style={styles.container} testID="account-screen">
-        <Text></Text>
-        <RegularButton
-          label="Log Out"
-          textStyle={styles.logoutButtonText}
-          buttonStyle={styles.logoutButton}
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#fff" }}
+      edges={["top", "left", "right"]}
+    >
+      <View className="flex-1 items-center justify-center" testID="account-screen">
+        <Button
           onPress={logoutUser}
+          className="w-64 max-w-sm"
           testID="sign-out-button"
-        />
+        >
+          <Text>Log Out</Text>
+        </Button>
       </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  logoutButton: {
-    minWidth: minWidth,
-    maxWidth: constmaxWidth,
-    backgroundColor: "#000000",
-    paddingVertical: 13,
-    borderRadius: 8,
-  },
-  logoutButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});

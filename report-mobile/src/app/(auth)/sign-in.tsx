@@ -1,16 +1,12 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
-import PasswordInput from "@/components/ui/inputs/PasswordInput";
-import GenericInput from "@/components/ui/inputs/GenericInput";
-import Divider from "@/components/ui/Divider";
-import LinkButton from "@/components/ui/LinkButton";
+import { View } from "react-native";
+import { Link } from "expo-router";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
+import { Separator } from "@/components/ui/separator";
+import { Text } from "@/components/ui/text";
 
 const SignInScreen: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -30,131 +26,69 @@ const SignInScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.container} testID="sign-in-screen">
-      <Text style={styles.title}>Better learning begins here.</Text>
-      <View style={styles.placeholder} />
-      <Text style={styles.subtitle}>Login to your Aura Learning account</Text>
-      <GenericInput
+    <View className="flex-1 bg-background px-6 py-4" testID="sign-in-screen">
+      <Text variant="h2" className="mb-4 w-4/5 shrink">
+        Better learning begins here.
+      </Text>
+      <View className="mb-6 h-36 rounded-lg bg-muted" />
+      <Text variant="large" className="mb-4 text-center">
+        Login to your Aura Learning account
+      </Text>
+      <Input
         value={email}
-        onValueChange={setEmail}
+        onChangeText={setEmail}
         placeholder="Enter your registered email"
-        showTitle={false}
-        containerStyle={styles.input}
+        autoCapitalize="none"
+        keyboardType="email-address"
+        className="mb-4"
         testID="email-input"
       />
       <PasswordInput
-        onValueChange={setPassword}
         value={password}
+        onChangeText={setPassword}
         placeholder="Enter your password"
-        showTitle={false}
-        containerStyle={styles.input}
+        containerClassName="mb-4"
         testID="password-input"
       />
-      <GenericInput
+      <Input
         value={registrationCode}
-        onValueChange={setRegistrationCode}
+        onChangeText={setRegistrationCode}
         placeholder="(Optional) Registration code"
-        showTitle={false}
-        containerStyle={styles.input}
+        autoCapitalize="none"
+        className="mb-4"
       />
-      <TouchableOpacity style={styles.button} onPress={handleLogin} testID="sign-in-button">
-        <Text style={styles.buttonText}>Login</Text>
-      </TouchableOpacity>
-      <View style={styles.footerContainer}>
-        <View style={styles.dividerContainer}>
-          <Divider isVertical={false} />
-          <Text style={styles.problemText}>Having problems logging in?</Text>
-          <Divider isVertical={false} />
+      <Button onPress={handleLogin} className="mt-1" testID="sign-in-button">
+        <Text>Login</Text>
+      </Button>
+
+      <View className="mt-5 items-center">
+        <View className="mb-2.5 w-[90%] flex-row items-center">
+          <Separator className="flex-1" />
+          <Text className="mx-2 text-sm text-muted-foreground">
+            Having problems logging in?
+          </Text>
+          <Separator className="flex-1" />
         </View>
-        <View style={styles.linksContainer}>
-          <LinkButton
-            href="/forgot-password"
-            label="I forgot my password"
-            buttonStyle={styles.linkWrapper}
-            textStyle={styles.linkText}
-            testID="forgot-password-link"
-          />
-          <Divider isVertical={true} />
-          <LinkButton
-            href="/other-problem"
-            label="Other problems"
-            buttonStyle={styles.linkWrapper}
-            textStyle={styles.linkText}
-          />
+        <View className="flex-row items-center justify-evenly">
+          <Link href="/forgot-password" asChild>
+            <Button variant="link" testID="forgot-password-link">
+              <Text className="text-sm text-muted-foreground">
+                I forgot my password
+              </Text>
+            </Button>
+          </Link>
+          <Separator orientation="vertical" className="h-8" />
+          <Link href="/other-problem" asChild>
+            <Button variant="link">
+              <Text className="text-sm text-muted-foreground">
+                Other problems
+              </Text>
+            </Button>
+          </Link>
         </View>
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    backgroundColor: "#fff",
-  },
-  title: {
-    fontSize: 30,
-    fontWeight: "800",
-    marginBottom: 16,
-    width: "80%",
-    flexShrink: 1,
-  },
-  placeholder: {
-    height: 150,
-    backgroundColor: "#e0e0e0",
-    borderRadius: 8,
-    marginBottom: 24,
-  },
-  subtitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  input: {
-    marginBottom: 16,
-  },
-  button: {
-    backgroundColor: "#000",
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 4,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-  },
-  footerContainer: {
-    alignItems: "center",
-    marginTop: 20,
-  },
-  dividerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "90%",
-    marginBottom: 10,
-  },
-  problemText: {
-    marginHorizontal: 8,
-    fontSize: 14,
-    color: "gray",
-  },
-  linksContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-evenly",
-  },
-  linkWrapper: {
-    alignItems: "center",
-    flex: 1,
-  },
-  linkText: {
-    fontSize: 14,
-    color: "gray",
-  },
-});
 
 export default SignInScreen;

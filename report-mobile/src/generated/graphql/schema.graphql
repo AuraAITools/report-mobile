@@ -772,6 +772,7 @@ type PriceRecordResponse {
 
 type Query {
   getAccountById(accountId: ID!): AccountResponse!
+  getAccountByUserId(institutionId: ID!, userId: ID!): AccountResponse!
   getAllAccountsInInstitution(institutionId: ID!): [AccountResponse!]!
   getAllCoursesInOutlet(institutionId: ID!, outletId: ID!): [CourseResponse!]!
   getAllEducatorsInInstitution(institutionId: ID!): [EducatorResponse!]!
