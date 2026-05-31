@@ -1,17 +1,17 @@
 import { useAuth } from "@/components/providers/AuthProvider";
-import { AccountsApis } from "@/lib/hooks/accounts-queries";
+import { useGetMyAccountInInstitution } from "@/features/account";
 import { Link } from "expo-router";
 import React from "react";
 import { Text, ScrollView, StyleSheet } from "react-native";
 
 export default function AccountsPage() {
   const { tenant_ids, userInfo } = useAuth();
-  console.log("tenant_ids", tenant_ids.at(0));
-  const { data: account, isPending } =
-    AccountsApis.useGetAllExpandedAccountsOfUserInInstitution(
-      tenant_ids.at(0),
-      userInfo?.sub
-    );
+  const institutionId = tenant_ids.at(0);
+
+  const { data: account, isPending } = useGetMyAccountInInstitution(
+    institutionId,
+    userInfo?.sub,
+  );
 
   return (
     <ScrollView
@@ -20,11 +20,13 @@ export default function AccountsPage() {
     >
       <Text style={styles.h1}>Welcome to Aura</Text>
       <Text style={styles.section}>Select an account to begin</Text>
-      {/* Educator Accounts section */}
       {isPending && <Text>Loading...</Text>}
-      {account && <Link href="parent-client/(tabs)">{account.first_name}</Link>}
-      <Link href="parent-client/(tabs)">Educator Account</Link>
-      {/* Parent Accounts section -> show each student  */}
+      {account && (
+        <Link href="/(authenticated)/parent-client/(tabs)">
+          {account.firstName}
+        </Link>
+      )}
+      <Link href="/(authenticated)/parent-client/(tabs)">Educator Account</Link>
     </ScrollView>
   );
 }

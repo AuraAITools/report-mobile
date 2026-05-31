@@ -1,4 +1,5 @@
 /* eslint-disable */
+import { DocumentTypeDecoration } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = T | null | undefined;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -1449,6 +1450,94 @@ export type UserPermissions = {
   permissions: Array<ResourcePermissions>;
 };
 
+export type GetAccountByIdQueryVariables = Exact<{
+  accountId: Scalars['ID']['input'];
+}>;
+
+
+export type GetAccountByIdQuery = { __typename?: 'Query', getAccountById: { __typename?: 'AccountResponse', id: string, userId: string, firstName: string, lastName: string, status: AccountStatus, profileImageUrl?: string | null, educatorFeatureEnabled: boolean, parentFeatureEnabled: boolean, staffFeatureEnabled: boolean, parent?: { __typename?: 'ParentResponse', id: string, relationship: Relationship, profileImageUrl?: string | null } | null, students: Array<{ __typename?: 'StudentResponse', id: string, name: string, email: string, dateOfBirth: any, profileImageUrl?: string | null }>, educators: Array<{ __typename?: 'EducatorResponse', id: string, name: string, email: string, employmentType: EmploymentType }> } };
+
+export type GetAllAccountsInInstitutionQueryVariables = Exact<{
+  institutionId: Scalars['ID']['input'];
+}>;
+
+
+export type GetAllAccountsInInstitutionQuery = { __typename?: 'Query', getAllAccountsInInstitution: Array<{ __typename?: 'AccountResponse', id: string, userId: string, firstName: string, lastName: string, status: AccountStatus, profileImageUrl?: string | null, parentFeatureEnabled: boolean, educatorFeatureEnabled: boolean, staffFeatureEnabled: boolean }> };
+
+export type GetAllCoursesInOutletQueryVariables = Exact<{
+  institutionId: Scalars['ID']['input'];
+  outletId: Scalars['ID']['input'];
+}>;
+
+
+export type GetAllCoursesInOutletQuery = { __typename?: 'Query', getAllCoursesInOutlet: Array<{ __typename?: 'CourseResponse', id: string, name: string, maxSize: number, lessonFrequency: LessonFrequency, courseStartTimestamptz: any, courseEndTimestamptz: any, level?: { __typename?: 'LevelResponse', id: string, name: string } | null, subjects: Array<{ __typename?: 'SubjectResponse', id: string, name: string }>, priceRecord?: { __typename?: 'PriceRecordResponse', id: string, frequency: PriceFrequency, price: number } | null }> };
+
+export type GetCourseByIdQueryVariables = Exact<{
+  courseId: Scalars['ID']['input'];
+}>;
+
+
+export type GetCourseByIdQuery = { __typename?: 'Query', getCourseById: { __typename?: 'CourseResponse', id: string, name: string, maxSize: number, lessonFrequency: LessonFrequency, courseStartTimestamptz: any, courseEndTimestamptz: any, level?: { __typename?: 'LevelResponse', id: string, name: string } | null, subjects: Array<{ __typename?: 'SubjectResponse', id: string, name: string }>, priceRecord?: { __typename?: 'PriceRecordResponse', id: string, frequency: PriceFrequency, price: number } | null, educators: Array<{ __typename?: 'EducatorResponse', id: string, name: string, email: string }>, students: Array<{ __typename?: 'StudentResponse', id: string, name: string, email: string }>, lessons: Array<{ __typename?: 'LessonResponse', id: string, name: string, lessonStartTimestamptz: any, lessonEndTimestamptz: any, state: LessonState }> } };
+
+export type GetInstitutionQueryVariables = Exact<{
+  institutionId: Scalars['ID']['input'];
+}>;
+
+
+export type GetInstitutionQuery = { __typename?: 'Query', getInstitution: { __typename?: 'InstitutionResponse', id: string, name: string, email: string, uen: string, address: string, contactNumber: string, logoUrl?: string | null, profileImageUrl?: string | null, state: InstitutionState, outlets: Array<{ __typename?: 'OutletResponse', id: string, name: string, address: string, email: string, contactNumber: number, postalCode: number, description: string }> } };
+
+export type GetInstitutionsByIdsQueryVariables = Exact<{
+  institutionIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+}>;
+
+
+export type GetInstitutionsByIdsQuery = { __typename?: 'Query', getInstitutionsByIds: Array<{ __typename?: 'InstitutionResponse', id: string, name: string, email: string, uen: string, address: string, contactNumber: string, logoUrl?: string | null, profileImageUrl?: string | null, state: InstitutionState, outlets: Array<{ __typename?: 'OutletResponse', id: string, name: string, address: string, email: string, contactNumber: number, postalCode: number, description: string }> }> };
+
+export type GetAllLessonsInCourseQueryVariables = Exact<{
+  institutionId: Scalars['ID']['input'];
+  courseId: Scalars['ID']['input'];
+}>;
+
+
+export type GetAllLessonsInCourseQuery = { __typename?: 'Query', getAllLessonsInCourse: Array<{ __typename?: 'LessonResponse', id: string, name: string, description?: string | null, state: LessonState, lessonStartTimestamptz: any, lessonEndTimestamptz: any, recap?: string | null, subjects: Array<{ __typename?: 'SubjectResponse', id: string, name: string }> }> };
+
+export type GetAllLessonsInOutletQueryVariables = Exact<{
+  institutionId: Scalars['ID']['input'];
+  outletId: Scalars['ID']['input'];
+}>;
+
+
+export type GetAllLessonsInOutletQuery = { __typename?: 'Query', getAllLessonsInOutlet: Array<{ __typename?: 'LessonResponse', id: string, name: string, description?: string | null, state: LessonState, lessonStartTimestamptz: any, lessonEndTimestamptz: any, course: { __typename?: 'CourseResponse', id: string, name: string } }> };
+
+export type GetLessonByIdQueryVariables = Exact<{
+  institutionId: Scalars['ID']['input'];
+  lessonId: Scalars['ID']['input'];
+}>;
+
+
+export type GetLessonByIdQuery = { __typename?: 'Query', getLessonById: { __typename?: 'LessonResponse', id: string, name: string, description?: string | null, state: LessonState, lessonStartTimestamptz: any, lessonEndTimestamptz: any, recap?: string | null, course: { __typename?: 'CourseResponse', id: string, name: string }, outlet: { __typename?: 'OutletResponse', id: string, name: string }, outletRoom?: { __typename?: 'OutletRoomResponse', id: string, name: string } | null, educators: Array<{ __typename?: 'EducatorResponse', id: string, name: string }>, students: Array<{ __typename?: 'StudentResponse', id: string, name: string }>, subjects: Array<{ __typename?: 'SubjectResponse', id: string, name: string }>, topics: Array<{ __typename?: 'TopicResponse', id: string, name: string }>, materials: Array<{ __typename?: 'MaterialResponse', id: string, name: string, fileUrl?: string | null, description?: string | null }>, lessonPlans: Array<{ __typename?: 'LessonPlanResponse', id: string, plan: string, state: LessonPlanState }>, lessonObjectives: Array<{ __typename?: 'LessonObjectiveResponse', id: string, name: string, objective: string }> } };
+
+export type GetOutletsInInstitutionQueryVariables = Exact<{
+  institutionId: Scalars['ID']['input'];
+}>;
+
+
+export type GetOutletsInInstitutionQuery = { __typename?: 'Query', getOutletsInInstitution: Array<{ __typename?: 'OutletResponse', id: string, name: string, address: string, email: string, contactNumber: number, postalCode: number, description: string }> };
+
+export type GetAllStudentsInInstitutionQueryVariables = Exact<{
+  institutionId: Scalars['ID']['input'];
+}>;
+
+
+export type GetAllStudentsInInstitutionQuery = { __typename?: 'Query', getAllStudentsInInstitution: Array<{ __typename?: 'StudentResponse', id: string, name: string, email: string, dateOfBirth: any, profileImageUrl?: string | null, level: { __typename?: 'LevelResponse', id: string, name: string, category: School_Category }, school: { __typename?: 'SchoolResponse', id: string, name: string, schoolCategory: SchoolCategory } }> };
+
+export type GetStudentByIdQueryVariables = Exact<{
+  input: GetStudentByIdInput;
+}>;
+
+
+export type GetStudentByIdQuery = { __typename?: 'Query', getStudentById: { __typename?: 'StudentResponse', id: string, name: string, email: string, dateOfBirth: any, profileImageUrl?: string | null, level: { __typename?: 'LevelResponse', id: string, name: string, category: School_Category }, school: { __typename?: 'SchoolResponse', id: string, name: string, schoolCategory: SchoolCategory }, courses: Array<{ __typename?: 'CourseResponse', id: string, name: string, lessonFrequency: LessonFrequency, courseStartTimestamptz: any, courseEndTimestamptz: any, subjects: Array<{ __typename?: 'SubjectResponse', id: string, name: string }> }> } };
+
 export class TypedDocumentString<TResult, TVariables>
   extends String
   implements DocumentTypeDecoration<TResult, TVariables>
@@ -1467,3 +1556,323 @@ export class TypedDocumentString<TResult, TVariables>
     return this.value;
   }
 }
+
+export const GetAccountByIdDocument = new TypedDocumentString(`
+    query GetAccountById($accountId: ID!) {
+  getAccountById(accountId: $accountId) {
+    id
+    userId
+    firstName
+    lastName
+    status
+    profileImageUrl
+    educatorFeatureEnabled
+    parentFeatureEnabled
+    staffFeatureEnabled
+    parent {
+      id
+      relationship
+      profileImageUrl
+    }
+    students {
+      id
+      name
+      email
+      dateOfBirth
+      profileImageUrl
+    }
+    educators {
+      id
+      name
+      email
+      employmentType
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<GetAccountByIdQuery, GetAccountByIdQueryVariables>;
+export const GetAllAccountsInInstitutionDocument = new TypedDocumentString(`
+    query GetAllAccountsInInstitution($institutionId: ID!) {
+  getAllAccountsInInstitution(institutionId: $institutionId) {
+    id
+    userId
+    firstName
+    lastName
+    status
+    profileImageUrl
+    parentFeatureEnabled
+    educatorFeatureEnabled
+    staffFeatureEnabled
+  }
+}
+    `) as unknown as TypedDocumentString<GetAllAccountsInInstitutionQuery, GetAllAccountsInInstitutionQueryVariables>;
+export const GetAllCoursesInOutletDocument = new TypedDocumentString(`
+    query GetAllCoursesInOutlet($institutionId: ID!, $outletId: ID!) {
+  getAllCoursesInOutlet(institutionId: $institutionId, outletId: $outletId) {
+    id
+    name
+    maxSize
+    lessonFrequency
+    courseStartTimestamptz
+    courseEndTimestamptz
+    level {
+      id
+      name
+    }
+    subjects {
+      id
+      name
+    }
+    priceRecord {
+      id
+      frequency
+      price
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<GetAllCoursesInOutletQuery, GetAllCoursesInOutletQueryVariables>;
+export const GetCourseByIdDocument = new TypedDocumentString(`
+    query GetCourseById($courseId: ID!) {
+  getCourseById(courseId: $courseId) {
+    id
+    name
+    maxSize
+    lessonFrequency
+    courseStartTimestamptz
+    courseEndTimestamptz
+    level {
+      id
+      name
+    }
+    subjects {
+      id
+      name
+    }
+    priceRecord {
+      id
+      frequency
+      price
+    }
+    educators {
+      id
+      name
+      email
+    }
+    students {
+      id
+      name
+      email
+    }
+    lessons {
+      id
+      name
+      lessonStartTimestamptz
+      lessonEndTimestamptz
+      state
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<GetCourseByIdQuery, GetCourseByIdQueryVariables>;
+export const GetInstitutionDocument = new TypedDocumentString(`
+    query GetInstitution($institutionId: ID!) {
+  getInstitution(institutionId: $institutionId) {
+    id
+    name
+    email
+    uen
+    address
+    contactNumber
+    logoUrl
+    profileImageUrl
+    state
+    outlets {
+      id
+      name
+      address
+      email
+      contactNumber
+      postalCode
+      description
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<GetInstitutionQuery, GetInstitutionQueryVariables>;
+export const GetInstitutionsByIdsDocument = new TypedDocumentString(`
+    query GetInstitutionsByIds($institutionIds: [ID!]!) {
+  getInstitutionsByIds(institutionIds: $institutionIds) {
+    id
+    name
+    email
+    uen
+    address
+    contactNumber
+    logoUrl
+    profileImageUrl
+    state
+    outlets {
+      id
+      name
+      address
+      email
+      contactNumber
+      postalCode
+      description
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<GetInstitutionsByIdsQuery, GetInstitutionsByIdsQueryVariables>;
+export const GetAllLessonsInCourseDocument = new TypedDocumentString(`
+    query GetAllLessonsInCourse($institutionId: ID!, $courseId: ID!) {
+  getAllLessonsInCourse(institutionId: $institutionId, courseId: $courseId) {
+    id
+    name
+    description
+    state
+    lessonStartTimestamptz
+    lessonEndTimestamptz
+    recap
+    subjects {
+      id
+      name
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<GetAllLessonsInCourseQuery, GetAllLessonsInCourseQueryVariables>;
+export const GetAllLessonsInOutletDocument = new TypedDocumentString(`
+    query GetAllLessonsInOutlet($institutionId: ID!, $outletId: ID!) {
+  getAllLessonsInOutlet(institutionId: $institutionId, outletId: $outletId) {
+    id
+    name
+    description
+    state
+    lessonStartTimestamptz
+    lessonEndTimestamptz
+    course {
+      id
+      name
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<GetAllLessonsInOutletQuery, GetAllLessonsInOutletQueryVariables>;
+export const GetLessonByIdDocument = new TypedDocumentString(`
+    query GetLessonById($institutionId: ID!, $lessonId: ID!) {
+  getLessonById(institutionId: $institutionId, lessonId: $lessonId) {
+    id
+    name
+    description
+    state
+    lessonStartTimestamptz
+    lessonEndTimestamptz
+    recap
+    course {
+      id
+      name
+    }
+    outlet {
+      id
+      name
+    }
+    outletRoom {
+      id
+      name
+    }
+    educators {
+      id
+      name
+    }
+    students {
+      id
+      name
+    }
+    subjects {
+      id
+      name
+    }
+    topics {
+      id
+      name
+    }
+    materials {
+      id
+      name
+      fileUrl
+      description
+    }
+    lessonPlans {
+      id
+      plan
+      state
+    }
+    lessonObjectives {
+      id
+      name
+      objective
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<GetLessonByIdQuery, GetLessonByIdQueryVariables>;
+export const GetOutletsInInstitutionDocument = new TypedDocumentString(`
+    query GetOutletsInInstitution($institutionId: ID!) {
+  getOutletsInInstitution(institutionId: $institutionId) {
+    id
+    name
+    address
+    email
+    contactNumber
+    postalCode
+    description
+  }
+}
+    `) as unknown as TypedDocumentString<GetOutletsInInstitutionQuery, GetOutletsInInstitutionQueryVariables>;
+export const GetAllStudentsInInstitutionDocument = new TypedDocumentString(`
+    query GetAllStudentsInInstitution($institutionId: ID!) {
+  getAllStudentsInInstitution(institutionId: $institutionId) {
+    id
+    name
+    email
+    dateOfBirth
+    profileImageUrl
+    level {
+      id
+      name
+      category
+    }
+    school {
+      id
+      name
+      schoolCategory
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<GetAllStudentsInInstitutionQuery, GetAllStudentsInInstitutionQueryVariables>;
+export const GetStudentByIdDocument = new TypedDocumentString(`
+    query GetStudentById($input: GetStudentByIdInput!) {
+  getStudentById(input: $input) {
+    id
+    name
+    email
+    dateOfBirth
+    profileImageUrl
+    level {
+      id
+      name
+      category
+    }
+    school {
+      id
+      name
+      schoolCategory
+    }
+    courses {
+      id
+      name
+      lessonFrequency
+      courseStartTimestamptz
+      courseEndTimestamptz
+      subjects {
+        id
+        name
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<GetStudentByIdQuery, GetStudentByIdQueryVariables>;
