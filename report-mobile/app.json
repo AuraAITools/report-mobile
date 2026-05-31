@@ -28,8 +28,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.aura.report",
-      "googleServicesFile": "./google-services.json"
+      "package": "com.aura.report"
     },
     "web": {
       "bundler": "metro",
@@ -51,7 +50,6 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/images/notification-icon.png",
           "color": "#ffffff",
           "sounds": [],
           "defaultChannel": "default"

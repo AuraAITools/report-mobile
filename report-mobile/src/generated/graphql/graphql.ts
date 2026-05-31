@@ -238,6 +238,7 @@ export type CreateLessonPlanForLessonInput = {
 };
 
 export type CreateLessonPlanInLessonInput = {
+  institutionId: Scalars['ID']['input'];
   lessonId: Scalars['ID']['input'];
   lessonObjectives: Array<CreateLessonObjectiveInLessonPlanInput>;
   materialIds: Array<Scalars['ID']['input']>;
@@ -424,6 +425,7 @@ export type GetStudentByIdInput = {
 };
 
 export type GrantUserGroupRoleInput = {
+  institutionId: Scalars['ID']['input'];
   role: UserGroupRole;
   userGroupId: Scalars['ID']['input'];
   userGroupType: UserGroupType;
@@ -768,11 +770,13 @@ export type MutationDeleteEducatorByIdArgs = {
 
 export type MutationDeleteLessonByIdArgs = {
   id: Scalars['ID']['input'];
+  institutionId: Scalars['ID']['input'];
 };
 
 
 export type MutationDeleteLevelByIdArgs = {
   id: Scalars['ID']['input'];
+  institutionId: Scalars['ID']['input'];
 };
 
 
@@ -783,6 +787,7 @@ export type MutationDeleteMaterialByIdArgs = {
 
 export type MutationDeleteOutletByIdArgs = {
   id: Scalars['ID']['input'];
+  institutionId: Scalars['ID']['input'];
 };
 
 
@@ -808,11 +813,13 @@ export type MutationDeleteStudentByIdArgs = {
 
 export type MutationDeleteSubjectByIdArgs = {
   id: Scalars['ID']['input'];
+  institutionId: Scalars['ID']['input'];
 };
 
 
 export type MutationDeleteTopicByIdArgs = {
   id: Scalars['ID']['input'];
+  institutionId: Scalars['ID']['input'];
 };
 
 
@@ -1039,6 +1046,7 @@ export type QueryGetAllAccountsInInstitutionArgs = {
 
 
 export type QueryGetAllCoursesInOutletArgs = {
+  institutionId: Scalars['ID']['input'];
   outletId: Scalars['ID']['input'];
 };
 
@@ -1050,10 +1058,12 @@ export type QueryGetAllEducatorsInInstitutionArgs = {
 
 export type QueryGetAllLessonsInCourseArgs = {
   courseId: Scalars['ID']['input'];
+  institutionId: Scalars['ID']['input'];
 };
 
 
 export type QueryGetAllLessonsInOutletArgs = {
+  institutionId: Scalars['ID']['input'];
   outletId: Scalars['ID']['input'];
 };
 
@@ -1116,6 +1126,7 @@ export type QueryGetInstitutionsByIdsArgs = {
 
 
 export type QueryGetLessonByIdArgs = {
+  institutionId: Scalars['ID']['input'];
   lessonId: Scalars['ID']['input'];
 };
 
@@ -1185,11 +1196,13 @@ export type QueryGetStudentByIdArgs = {
 
 
 export type QueryGetSubjectByIdArgs = {
+  institutionId: Scalars['ID']['input'];
   subjectId: Scalars['ID']['input'];
 };
 
 
 export type QueryGetTopicByIdArgs = {
+  institutionId: Scalars['ID']['input'];
   topicId: Scalars['ID']['input'];
 };
 
@@ -1238,6 +1251,7 @@ export type ResourcePermissions = {
 };
 
 export type RevokeUserGroupRoleInput = {
+  institutionId: Scalars['ID']['input'];
   role: UserGroupRole;
   userGroupId: Scalars['ID']['input'];
   userGroupType: UserGroupType;

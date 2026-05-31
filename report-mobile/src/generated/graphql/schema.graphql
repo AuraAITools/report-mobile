@@ -248,6 +248,7 @@ input CreateLessonPlanForLessonInput {
 }
 
 input CreateLessonPlanInLessonInput {
+  institutionId: ID!
   lessonId: ID!
   lessonObjectives: [CreateLessonObjectiveInLessonPlanInput!]!
   materialIds: [ID!]!
@@ -440,6 +441,7 @@ input GetStudentByIdInput {
 }
 
 input GrantUserGroupRoleInput {
+  institutionId: ID!
   role: UserGroupRole!
   userGroupId: ID!
   userGroupType: UserGroupType!
@@ -637,16 +639,16 @@ type Mutation {
   createTopic(topicInput: TopicInput!): TopicResponse!
   deleteCourseById(id: ID!): Boolean!
   deleteEducatorById(input: DeleteEducatorByIdInput!): Boolean!
-  deleteLessonById(id: ID!): Boolean!
-  deleteLevelById(id: ID!): Boolean!
+  deleteLessonById(id: ID!, institutionId: ID!): Boolean!
+  deleteLevelById(id: ID!, institutionId: ID!): Boolean!
   deleteMaterialById(deleteMaterialByIdInput: DeleteMaterialByIdInput!): Boolean!
-  deleteOutletById(id: ID!): Boolean!
+  deleteOutletById(id: ID!, institutionId: ID!): Boolean!
   deleteOutletRoomById(deleteOutletRoomByIdInput: DeleteOutletRoomByIdInput!): Boolean!
   deleteParentById(input: DeleteParentByIdInput!): Boolean!
   deleteSchoolInInstitution(deleteSchoolInInstitutionInput: DeleteSchoolInInstitutionInput!): Boolean!
   deleteStudentById(input: DeleteStudentByIdInput!): Boolean!
-  deleteSubjectById(id: ID!): Boolean!
-  deleteTopicById(id: ID!): Boolean!
+  deleteSubjectById(id: ID!, institutionId: ID!): Boolean!
+  deleteTopicById(id: ID!, institutionId: ID!): Boolean!
   enableAccountFeature(enableAccountFeatureInput: EnableAccountFeatureInput!): AccountResponse!
   grantUserGroupRole(input: GrantUserGroupRoleInput!): Boolean!
   requestAccountProfileImageUpload(input: RequestAccountProfileImageUploadInput!): AccountProfileImageUploadResponse!
@@ -771,10 +773,10 @@ type PriceRecordResponse {
 type Query {
   getAccountById(accountId: ID!): AccountResponse!
   getAllAccountsInInstitution(institutionId: ID!): [AccountResponse!]!
-  getAllCoursesInOutlet(outletId: ID!): [CourseResponse!]!
+  getAllCoursesInOutlet(institutionId: ID!, outletId: ID!): [CourseResponse!]!
   getAllEducatorsInInstitution(institutionId: ID!): [EducatorResponse!]!
-  getAllLessonsInCourse(courseId: ID!): [LessonResponse!]!
-  getAllLessonsInOutlet(outletId: ID!): [LessonResponse!]!
+  getAllLessonsInCourse(courseId: ID!, institutionId: ID!): [LessonResponse!]!
+  getAllLessonsInOutlet(institutionId: ID!, outletId: ID!): [LessonResponse!]!
   getAllOutletRoomsByIds(ids: [ID!]!, institutionId: ID!): [OutletRoomResponse!]!
   getAllOutletRoomsInInstitution(institutionId: ID!): [OutletRoomResponse!]!
   getAllOutletRoomsInOutlet(institutionId: ID!, outletId: ID!): [OutletRoomResponse!]!
@@ -786,7 +788,7 @@ type Query {
   getEducatorById(input: GetEducatorByIdInput!): EducatorResponse!
   getInstitution(institutionId: ID!): InstitutionResponse!
   getInstitutionsByIds(institutionIds: [ID!]!): [InstitutionResponse!]!
-  getLessonById(lessonId: ID!): LessonResponse!
+  getLessonById(institutionId: ID!, lessonId: ID!): LessonResponse!
   getLevelByIdInInstitution(institutionId: ID!, levelId: ID!): LevelResponse!
   getLevelByPage(after: String, before: String, first: Int, institutionId: ID!, last: Int, search: LevelSearchInput, sort: SortInput): LevelResponseConnection!
   getLevelsInInstitution(institutionId: ID!): [LevelResponse!]!
@@ -797,8 +799,8 @@ type Query {
   getParentById(input: GetParentByIdInput!): ParentResponse!
   getSchoolsInInstitution(institutionId: ID!): [SchoolResponse!]!
   getStudentById(input: GetStudentByIdInput!): StudentResponse!
-  getSubjectById(subjectId: ID!): SubjectResponse!
-  getTopicById(topicId: ID!): TopicResponse!
+  getSubjectById(institutionId: ID!, subjectId: ID!): SubjectResponse!
+  getTopicById(institutionId: ID!, topicId: ID!): TopicResponse!
   lookupPermissions: UserPermissions!
 }
 
@@ -846,6 +848,7 @@ type ResourcePermissions {
 }
 
 input RevokeUserGroupRoleInput {
+  institutionId: ID!
   role: UserGroupRole!
   userGroupId: ID!
   userGroupType: UserGroupType!
