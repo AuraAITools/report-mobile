@@ -10,12 +10,14 @@ export type ProcessedTokenResult = {
   tokenResponse: TokenResponse;
   accessToken: AccessToken;
   roles: string[];
+  groups: string[];
   tenantIds: string[];
 };
 
 /**
- * Decodes the access token JWT, extracts roles and tenant IDs from the payload,
- * persists all tokens to secure storage, and returns the decoded data.
+ * Decodes the access token JWT, extracts roles, groups, and tenant IDs from
+ * the payload, persists all tokens to secure storage, and returns the
+ * decoded data.
  */
 export async function processTokenResponse(
   tokenResponse: TokenResponse,
@@ -23,8 +25,11 @@ export async function processTokenResponse(
   const rawAccessToken = tokenResponse.accessToken;
   const accessToken = AccessTokenUtils.decodeJWT(rawAccessToken);
 
-  const roles =
-    accessToken.resource_access?.["aura-application-client"]?.roles ?? [];
+  const roles = AccessTokenUtils.getResourceRoles(
+    accessToken,
+    "aura-application-client",
+  );
+  const groups = AccessTokenUtils.getGroups(accessToken);
   const tenantIds = accessToken.ext_attrs?.tenant_ids ?? [];
 
   // Persist tokens to secure storage
@@ -44,10 +49,12 @@ export async function processTokenResponse(
     console.log(
       "Tokens saved — roles:",
       roles,
+      "groups:",
+      groups,
       "tenantIds count:",
       tenantIds.length,
     );
   }
 
-  return { tokenResponse, accessToken, roles, tenantIds };
+  return { tokenResponse, accessToken, roles, groups, tenantIds };
 }

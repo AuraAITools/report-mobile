@@ -1,44 +1,61 @@
 import { z } from "zod";
 import { decode as atob, encode as btoa } from "base-64";
 
-// Zod schema for the access token JWT payload
+// Zod schema for the access token JWT payload.
+//
+// Validation philosophy: be permissive about what Keycloak emits — the
+// website pulls claims with no validation at all. We keep enough structure
+// to power our auth context while tolerating realistic variation:
+//   - jti/sid are not guaranteed UUIDs in modern Keycloak builds
+//   - aud is allowed to be a single string (OIDC spec) and normalized to an array
+//   - resource_access is legacy — users without client-specific roles won't
+//     have an "aura-application-client" entry; authorization now flows through
+//     `groups` (read by report-ms) and SpiceDB-backed permissions
 export const AccessTokenSchema = z
   .object({
     // Standard JWT claims
-    exp: z.number().int().positive(), // Expiration time (Unix timestamp)
-    iat: z.number().int().positive(), // Issued at time (Unix timestamp)
-    auth_time: z.number().int().positive(), // Authentication time (Unix timestamp)
-    jti: z.string().uuid(), // JWT ID
-    iss: z.string().url(), // Issuer
-    aud: z.array(z.string()), // Audience
-    sub: z.string().uuid(), // Subject (user ID)
-    typ: z.literal("Bearer"), // Token type
-    azp: z.string(), // Authorized party (client ID)
-    sid: z.string().uuid(), // Session ID
-    acr: z.string(), // Authentication Context Class Reference
-    ext_attrs: z.object({
-      tenant_ids: z.array(z.string().uuid()), // Tenant IDs (if multi-tenant)
-    }),
+    exp: z.number().int().positive(),
+    iat: z.number().int().positive(),
+    auth_time: z.number().int().positive().optional(),
+    jti: z.string(),
+    iss: z.string().url(),
+    aud: z
+      .union([z.string(), z.array(z.string())])
+      .transform((v) => (Array.isArray(v) ? v : [v])),
+    sub: z.string().uuid(),
+    typ: z.string().optional(),
+    azp: z.string().optional(),
+    sid: z.string().optional(),
+    acr: z.string().optional(),
 
-    // Keycloak specific claims
-    "allowed-origins": z.array(z.string()),
+    ext_attrs: z
+      .object({
+        tenant_ids: z.array(z.string()).default([]),
+      })
+      .partial()
+      .optional(),
 
-    resource_access: z.object({
-      "aura-application-client": z.object({
-        roles: z.array(z.string()),
-      }),
-    }),
+    "allowed-origins": z.array(z.string()).optional(),
 
-    // Scope and user info
-    scope: z.string(),
-    email_verified: z.boolean(),
-    name: z.string(),
-    preferred_username: z.string(),
-    given_name: z.string(),
-    family_name: z.string(),
-    email: z.string().email(),
+    // Legacy client-role mapping. Present only when the user has roles
+    // assigned to the client; otherwise the field is absent.
+    resource_access: z
+      .record(z.object({ roles: z.array(z.string()) }).partial())
+      .optional(),
+
+    // New authoritative role source — emitted by the microprofile-jwt
+    // scope's realm-role mapper and consumed by report-ms' UserMapper.
+    groups: z.array(z.string()).optional(),
+
+    scope: z.string().optional(),
+    email_verified: z.boolean().optional(),
+    name: z.string().optional(),
+    preferred_username: z.string().optional(),
+    given_name: z.string().optional(),
+    family_name: z.string().optional(),
+    email: z.string().email().optional(),
   })
-  .passthrough(); // Allow additional properties not defined in the schema
+  .passthrough();
 
 // TypeScript type inferred from the Zod schema
 export type AccessToken = z.infer<typeof AccessTokenSchema>;
@@ -78,19 +95,27 @@ export class AccessTokenUtils {
   }
 
   /**
-   * Gets all roles for a specific resource
-   * TODO: make resource configurable to more than aura-application-client
+   * Gets all roles for a specific resource. Returns an empty array when the
+   * claim is missing — common for users whose authorization is now driven by
+   * `groups` rather than client-specific role assignments.
    */
   static getResourceRoles(token: AccessToken, resource: string): string[] {
-    const resourceAccess = token.resource_access["aura-application-client"];
-    return resourceAccess ? resourceAccess.roles : [];
+    return token.resource_access?.[resource]?.roles ?? [];
+  }
+
+  /**
+   * Gets the groups claim — the new authoritative role source consumed by
+   * report-ms.
+   */
+  static getGroups(token: AccessToken): string[] {
+    return token.groups ?? [];
   }
 
   /**
    * Gets user's full name
    */
   static getFullName(token: AccessToken): string {
-    return token.name || `${token.given_name} ${token.family_name}`;
+    return token.name || `${token.given_name ?? ""} ${token.family_name ?? ""}`.trim();
   }
 
   /**

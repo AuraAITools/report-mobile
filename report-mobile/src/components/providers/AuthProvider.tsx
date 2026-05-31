@@ -39,6 +39,7 @@ const AuthContext = createContext<AuthData>({
   refreshUserSession: async () => {},
   unlockWithBiometrics: async () => false,
   roles: [],
+  groups: [],
   tenant_ids: [],
   isAuthenticated: false,
   isLocked: false,
@@ -51,6 +52,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
 
   const [tokenResponse, setTokenResponse] = useState<TokenResponse | undefined>();
   const [roles, setRoles] = useState<string[]>([]);
+  const [groups, setGroups] = useState<string[]>([]);
   const [tenant_ids, setTenantIds] = useState<string[]>([]);
   const [userInfo, setUserInfo] = useState<UserInfo | undefined>();
   const [refreshToken, setRefreshToken] = useState<string | undefined>();
@@ -102,6 +104,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
         const session = await processTokenResponse(tokenResp);
         setTokenResponse(session.tokenResponse);
         setRoles(session.roles);
+        setGroups(session.groups);
         setTenantIds(session.tenantIds);
         setRefreshToken(session.tokenResponse.refreshToken);
         setIsAuthenticated(true);
@@ -144,8 +147,11 @@ export default function AuthProvider({ children }: PropsWithChildren) {
 
         if (!AccessTokenUtils.isExpired(decoded)) {
           // Token still valid — restore session
-          setRoles(decoded.resource_access["aura-application-client"].roles);
-          setTenantIds(decoded.ext_attrs.tenant_ids);
+          setRoles(
+            AccessTokenUtils.getResourceRoles(decoded, "aura-application-client"),
+          );
+          setGroups(AccessTokenUtils.getGroups(decoded));
+          setTenantIds(decoded.ext_attrs?.tenant_ids ?? []);
           setRefreshToken(storedRefreshToken);
           setIsAuthenticated(true);
 
@@ -169,6 +175,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
           const session = await processTokenResponse(tokenResp);
           setTokenResponse(session.tokenResponse);
           setRoles(session.roles);
+          setGroups(session.groups);
           setTenantIds(session.tenantIds);
           setRefreshToken(session.tokenResponse.refreshToken);
           setIsAuthenticated(true);
@@ -206,6 +213,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
         const session = await processTokenResponse(tokenResp);
         setTokenResponse(session.tokenResponse);
         setRoles(session.roles);
+        setGroups(session.groups);
         setTenantIds(session.tenantIds);
         setRefreshToken(session.tokenResponse.refreshToken);
         setIsAuthenticated(true);
@@ -353,6 +361,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
       setIsAuthenticated(false);
       setIsLocked(false);
       setRoles([]);
+      setGroups([]);
       setTenantIds([]);
       setUserInfo(undefined);
       setRefreshToken(undefined);
@@ -388,6 +397,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
       const session = await processTokenResponse(tokenResp);
       setTokenResponse(session.tokenResponse);
       setRoles(session.roles);
+      setGroups(session.groups);
       setTenantIds(session.tenantIds);
       setRefreshToken(session.tokenResponse.refreshToken);
       setIsAuthenticated(true);
@@ -423,6 +433,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
         isLocked,
         isRestoringSession,
         roles,
+        groups,
         tenant_ids,
         tokenResponse,
       }}

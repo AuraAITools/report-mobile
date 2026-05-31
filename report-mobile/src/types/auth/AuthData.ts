@@ -8,6 +8,7 @@ type AuthData = {
   refreshUserSession: () => Promise<void>;
   unlockWithBiometrics: () => Promise<boolean>;
   roles: string[];
+  groups: string[];
   tenant_ids: string[];
   tokenResponse: TokenResponse | undefined;
   isAuthenticated: boolean;
