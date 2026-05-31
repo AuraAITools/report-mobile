@@ -11,6 +11,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { PropsWithChildren, useEffect } from "react";
 
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useColorScheme } from "@components/useColorScheme";
 import AuthProvider, { useAuth } from "@/components/providers/AuthProvider";
 import QueryProvider from "@/components/providers/QueryProvider";
@@ -57,24 +58,26 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <QueryProvider>
-        <AuthProvider>
-          <NotificationProvider>
-            <NetworkStatusBanner />
-            <AuthGate>
-              <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="(auth)" />
-                <Stack.Screen
-                  name="(authenticated)"
-                  options={{ title: "Navigation" }}
-                />
-              </Stack>
-            </AuthGate>
-          </NotificationProvider>
-        </AuthProvider>
-      </QueryProvider>
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <QueryProvider>
+          <AuthProvider>
+            <NotificationProvider>
+              <NetworkStatusBanner />
+              <AuthGate>
+                <Stack screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="(auth)" />
+                  <Stack.Screen
+                    name="(authenticated)"
+                    options={{ title: "Navigation" }}
+                  />
+                </Stack>
+              </AuthGate>
+            </NotificationProvider>
+          </AuthProvider>
+        </QueryProvider>
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }
 

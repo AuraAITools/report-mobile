@@ -1517,13 +1517,6 @@ export type GetLessonByIdQueryVariables = Exact<{
 
 export type GetLessonByIdQuery = { __typename?: 'Query', getLessonById: { __typename?: 'LessonResponse', id: string, name: string, description?: string | null, state: LessonState, lessonStartTimestamptz: any, lessonEndTimestamptz: any, recap?: string | null, course: { __typename?: 'CourseResponse', id: string, name: string }, outlet: { __typename?: 'OutletResponse', id: string, name: string }, outletRoom?: { __typename?: 'OutletRoomResponse', id: string, name: string } | null, educators: Array<{ __typename?: 'EducatorResponse', id: string, name: string }>, students: Array<{ __typename?: 'StudentResponse', id: string, name: string }>, subjects: Array<{ __typename?: 'SubjectResponse', id: string, name: string }>, topics: Array<{ __typename?: 'TopicResponse', id: string, name: string }>, materials: Array<{ __typename?: 'MaterialResponse', id: string, name: string, fileUrl?: string | null, description?: string | null }>, lessonPlans: Array<{ __typename?: 'LessonPlanResponse', id: string, plan: string, state: LessonPlanState }>, lessonObjectives: Array<{ __typename?: 'LessonObjectiveResponse', id: string, name: string, objective: string }> } };
 
-export type GetOutletsInInstitutionQueryVariables = Exact<{
-  institutionId: Scalars['ID']['input'];
-}>;
-
-
-export type GetOutletsInInstitutionQuery = { __typename?: 'Query', getOutletsInInstitution: Array<{ __typename?: 'OutletResponse', id: string, name: string, address: string, email: string, contactNumber: number, postalCode: number, description: string }> };
-
 export type GetAllStudentsInInstitutionQueryVariables = Exact<{
   institutionId: Scalars['ID']['input'];
 }>;
@@ -1810,19 +1803,6 @@ export const GetLessonByIdDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<GetLessonByIdQuery, GetLessonByIdQueryVariables>;
-export const GetOutletsInInstitutionDocument = new TypedDocumentString(`
-    query GetOutletsInInstitution($institutionId: ID!) {
-  getOutletsInInstitution(institutionId: $institutionId) {
-    id
-    name
-    address
-    email
-    contactNumber
-    postalCode
-    description
-  }
-}
-    `) as unknown as TypedDocumentString<GetOutletsInInstitutionQuery, GetOutletsInInstitutionQueryVariables>;
 export const GetAllStudentsInInstitutionDocument = new TypedDocumentString(`
     query GetAllStudentsInInstitution($institutionId: ID!) {
   getAllStudentsInInstitution(institutionId: $institutionId) {

@@ -2,6 +2,7 @@ import { Stack, useRouter, Redirect } from "expo-router";
 import React from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { InstitutionsProvider } from "@/components/providers/InstitutionsProvider";
 
 // expo-router picks this up automatically for this route group
 export function ErrorBoundary({
@@ -35,9 +36,11 @@ export default function AuthenticatedLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="parent-client/(tabs)" options={{ title: "Home" }} />
-    </Stack>
+    <InstitutionsProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="parent-client/(tabs)" options={{ title: "Home" }} />
+      </Stack>
+    </InstitutionsProvider>
   );
 }
 

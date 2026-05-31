@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react"
 import { Dimensions } from "react-native"
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
 import { Subject } from "@/types/models/Subject"
 import FontAwesome from "@expo/vector-icons/FontAwesome"
 import { Lesson } from "@/types/models/Lesson"
@@ -178,32 +179,38 @@ const LessonScreen = () => {
   )
 
   return (
-    <View style={styles.container} testID="lessons-screen">
-      <View>
-        <View style={styles.header}>
-          <Text style={styles.name}>Lessons</Text>
+    <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
+      <View style={styles.container} testID="lessons-screen">
+        <View>
+          <View style={styles.header}>
+            <Text style={styles.name}>Lessons</Text>
+          </View>
+
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.subjects}>
+            {studentSubjectItems}
+          </ScrollView>
         </View>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.subjects}>
-          {studentSubjectItems}
-        </ScrollView>
-      </View>
-
-      <View style={styles.searchContainer}>
-        <View style={styles.searchInputContainer}>
-          <FontAwesome style={styles.searchIcon} size={16} name='search' color={"#828282"} />
-          <TextInput style={styles.searchInput} placeholder='Search' />
+        <View style={styles.searchContainer}>
+          <View style={styles.searchInputContainer}>
+            <FontAwesome style={styles.searchIcon} size={16} name='search' color={"#828282"} />
+            <TextInput style={styles.searchInput} placeholder='Search' />
+          </View>
+          <TouchableOpacity onPress={handleLessonFilter}>
+            <Text style={styles.filterButtonText}>Filter View</Text>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity onPress={handleLessonFilter}>
-          <Text style={styles.filterButtonText}>Filter View</Text>
-        </TouchableOpacity>
+        <ScrollView testID="lessons-list">{studentSubjectLessons}</ScrollView>
       </View>
-      <ScrollView testID="lessons-list">{studentSubjectLessons}</ScrollView>
-    </View>
+    </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
   container: {
     flex: 1,
     backgroundColor: "#fff",

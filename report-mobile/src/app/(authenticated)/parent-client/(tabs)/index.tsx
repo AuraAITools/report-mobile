@@ -8,6 +8,7 @@ import {
   ScrollView,
   Image,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import LessonCard from "@/components/ui/LessonCard";
 import { Exam } from "@/types/models/Exam";
 import { Subject } from "@/types/models/Subject";
@@ -140,8 +141,9 @@ const HomeScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container} testID="home-screen">
-      <View style={styles.header} testID="home-header">
+    <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
+      <ScrollView style={styles.container} testID="home-screen">
+        <View style={styles.header} testID="home-header">
         <View style={styles.headerTextContainer}>
           <Text style={styles.name}>{userInfo?.name}</Text>
           <TouchableOpacity onPress={handleStudentSwitch}>
@@ -218,11 +220,16 @@ const HomeScreen = () => {
           Registration for Academic Year 2024 Starts Now!
         </Text>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
   container: {
     flex: 1,
     backgroundColor: "#fff",
