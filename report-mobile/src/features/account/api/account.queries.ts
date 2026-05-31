@@ -37,6 +37,40 @@ const GetAccountByIdDocument = graphql(/* GraphQL */ `
   }
 `);
 
+export const GetAccountByUserIdDocument = graphql(/* GraphQL */ `
+  query GetAccountByUserId($institutionId: ID!, $userId: ID!) {
+    getAccountByUserId(institutionId: $institutionId, userId: $userId) {
+      id
+      userId
+      firstName
+      lastName
+      status
+      profileImageUrl
+      educatorFeatureEnabled
+      parentFeatureEnabled
+      staffFeatureEnabled
+      parent {
+        id
+        relationship
+        profileImageUrl
+      }
+      students {
+        id
+        name
+        email
+        dateOfBirth
+        profileImageUrl
+      }
+      educators {
+        id
+        name
+        email
+        employmentType
+      }
+    }
+  }
+`);
+
 const GetAllAccountsInInstitutionDocument = graphql(/* GraphQL */ `
   query GetAllAccountsInInstitution($institutionId: ID!) {
     getAllAccountsInInstitution(institutionId: $institutionId) {
@@ -60,6 +94,26 @@ export function useGetAccountById(accountId: string | undefined) {
       graphqlClient(GetAccountByIdDocument, { accountId: accountId! }, signal),
     enabled: !!accountId,
     select: (data) => data.getAccountById,
+  });
+}
+
+export function useGetAccountByUserId(
+  institutionId: string | undefined,
+  userId: string | undefined,
+) {
+  return useQuery({
+    queryKey:
+      institutionId && userId
+        ? accountKeys.byUserAndInstitution(institutionId, userId)
+        : accountKeys.all,
+    queryFn: ({ signal }) =>
+      graphqlClient(
+        GetAccountByUserIdDocument,
+        { institutionId: institutionId!, userId: userId! },
+        signal,
+      ),
+    enabled: !!institutionId && !!userId,
+    select: (data) => data.getAccountByUserId,
   });
 }
 

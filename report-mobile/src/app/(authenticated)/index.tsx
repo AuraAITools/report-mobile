@@ -1,60 +1,42 @@
-import { useAuth } from "@/components/providers/AuthProvider";
-import { useGetMyAccountInInstitution } from "@/features/account";
-import { Link } from "expo-router";
-import React from "react";
-import { Text, ScrollView, StyleSheet } from "react-native";
+import { ActivityIndicator, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Text } from "@/components/ui/text";
+import { useAccountContext } from "@/components/providers/AccountProvider";
+import { useInstitutionsContext } from "@/components/providers/InstitutionsProvider";
+import { InstitutionAccountCard } from "@/components/account/InstitutionAccountCard";
 
 export default function AccountsPage() {
-  const { tenant_ids, userInfo } = useAuth();
-  const institutionId = tenant_ids.at(0);
-
-  const { data: account, isPending } = useGetMyAccountInInstitution(
-    institutionId,
-    userInfo?.sub,
-  );
+  const { institutions } = useInstitutionsContext();
+  const { accountsByInstitutionId, isLoading } = useAccountContext();
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView className="bg-background flex-1">
       <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.contentContainer}
+        className="flex-1"
+        contentContainerClassName="px-4 pt-4 pb-8"
       >
-        <Text style={styles.h1}>Welcome to Aura</Text>
-        <Text style={styles.section}>Select an account to begin</Text>
-        {isPending && <Text>Loading...</Text>}
-        {account && (
-          <Link href="/(authenticated)/parent-client/(tabs)">
-            {account.firstName}
-          </Link>
+        <View className="mb-5">
+          <Text className="text-2xl font-bold">Welcome to Aura</Text>
+          <Text className="text-muted-foreground text-sm">
+            Select an account to begin
+          </Text>
+        </View>
+
+        {isLoading && (
+          <View className="items-center py-10">
+            <ActivityIndicator />
+          </View>
         )}
-        <Link href="/(authenticated)/parent-client/(tabs)">Educator Account</Link>
+
+        {!isLoading &&
+          institutions.map((institution) => (
+            <InstitutionAccountCard
+              key={institution.id}
+              institution={institution}
+              account={accountsByInstitutionId[institution.id]}
+            />
+          ))}
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  contentContainer: {
-    flex: 1,
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
-    padding: 8,
-  },
-  h1: {
-    fontSize: 36,
-    fontWeight: "bold",
-  },
-  section: {
-    fontSize: 14,
-    paddingVertical: 4,
-  },
-});

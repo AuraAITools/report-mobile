@@ -1464,6 +1464,14 @@ export type GetAccountByIdQueryVariables = Exact<{
 
 export type GetAccountByIdQuery = { __typename?: 'Query', getAccountById: { __typename?: 'AccountResponse', id: string, userId: string, firstName: string, lastName: string, status: AccountStatus, profileImageUrl?: string | null, educatorFeatureEnabled: boolean, parentFeatureEnabled: boolean, staffFeatureEnabled: boolean, parent?: { __typename?: 'ParentResponse', id: string, relationship: Relationship, profileImageUrl?: string | null } | null, students: Array<{ __typename?: 'StudentResponse', id: string, name: string, email: string, dateOfBirth: any, profileImageUrl?: string | null }>, educators: Array<{ __typename?: 'EducatorResponse', id: string, name: string, email: string, employmentType: EmploymentType }> } };
 
+export type GetAccountByUserIdQueryVariables = Exact<{
+  institutionId: Scalars['ID']['input'];
+  userId: Scalars['ID']['input'];
+}>;
+
+
+export type GetAccountByUserIdQuery = { __typename?: 'Query', getAccountByUserId: { __typename?: 'AccountResponse', id: string, userId: string, firstName: string, lastName: string, status: AccountStatus, profileImageUrl?: string | null, educatorFeatureEnabled: boolean, parentFeatureEnabled: boolean, staffFeatureEnabled: boolean, parent?: { __typename?: 'ParentResponse', id: string, relationship: Relationship, profileImageUrl?: string | null } | null, students: Array<{ __typename?: 'StudentResponse', id: string, name: string, email: string, dateOfBirth: any, profileImageUrl?: string | null }>, educators: Array<{ __typename?: 'EducatorResponse', id: string, name: string, email: string, employmentType: EmploymentType }> } };
+
 export type GetAllAccountsInInstitutionQueryVariables = Exact<{
   institutionId: Scalars['ID']['input'];
 }>;
@@ -1590,6 +1598,39 @@ export const GetAccountByIdDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<GetAccountByIdQuery, GetAccountByIdQueryVariables>;
+export const GetAccountByUserIdDocument = new TypedDocumentString(`
+    query GetAccountByUserId($institutionId: ID!, $userId: ID!) {
+  getAccountByUserId(institutionId: $institutionId, userId: $userId) {
+    id
+    userId
+    firstName
+    lastName
+    status
+    profileImageUrl
+    educatorFeatureEnabled
+    parentFeatureEnabled
+    staffFeatureEnabled
+    parent {
+      id
+      relationship
+      profileImageUrl
+    }
+    students {
+      id
+      name
+      email
+      dateOfBirth
+      profileImageUrl
+    }
+    educators {
+      id
+      name
+      email
+      employmentType
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<GetAccountByUserIdQuery, GetAccountByUserIdQueryVariables>;
 export const GetAllAccountsInInstitutionDocument = new TypedDocumentString(`
     query GetAllAccountsInInstitution($institutionId: ID!) {
   getAllAccountsInInstitution(institutionId: $institutionId) {
