@@ -38,6 +38,25 @@ const GetAllLessonsInOutletDocument = graphql(/* GraphQL */ `
   }
 `);
 
+const GetLessonsForEducatorDocument = graphql(/* GraphQL */ `
+  query GetLessonsForEducator($institutionId: ID!, $educatorId: ID!) {
+    getEducatorById(input: { id: $educatorId, institutionId: $institutionId }) {
+      id
+      courses {
+        id
+        name
+        lessons {
+          id
+          name
+          state
+          lessonStartTimestamptz
+          lessonEndTimestamptz
+        }
+      }
+    }
+  }
+`);
+
 const GetLessonByIdDocument = graphql(/* GraphQL */ `
   query GetLessonById($institutionId: ID!, $lessonId: ID!) {
     getLessonById(institutionId: $institutionId, lessonId: $lessonId) {
@@ -133,6 +152,47 @@ export function useGetAllLessonsInOutlet(
       ),
     enabled: !!institutionId && !!outletId,
     select: (data) => data.getAllLessonsInOutlet,
+  });
+}
+
+export type EducatorLesson = {
+  id: string;
+  name: string;
+  state: string;
+  lessonStartTimestamptz: number;
+  lessonEndTimestamptz: number;
+  courseId: string;
+  courseName: string;
+};
+
+export function useGetLessonsForEducator(
+  institutionId: string | undefined,
+  educatorId: string | undefined,
+) {
+  return useQuery({
+    queryKey:
+      institutionId && educatorId
+        ? lessonKeys.byEducator(institutionId, educatorId)
+        : lessonKeys.all,
+    queryFn: ({ signal }) =>
+      graphqlClient(
+        GetLessonsForEducatorDocument,
+        { institutionId: institutionId!, educatorId: educatorId! },
+        signal,
+      ),
+    enabled: !!institutionId && !!educatorId,
+    select: (data): EducatorLesson[] =>
+      data.getEducatorById.courses.flatMap((course) =>
+        course.lessons.map((lesson) => ({
+          id: lesson.id,
+          name: lesson.name,
+          state: lesson.state,
+          lessonStartTimestamptz: Number(lesson.lessonStartTimestamptz),
+          lessonEndTimestamptz: Number(lesson.lessonEndTimestamptz),
+          courseId: course.id,
+          courseName: course.name,
+        })),
+      ),
   });
 }
 

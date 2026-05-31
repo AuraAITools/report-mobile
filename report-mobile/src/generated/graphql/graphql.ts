@@ -1524,6 +1524,14 @@ export type GetAllLessonsInOutletQueryVariables = Exact<{
 
 export type GetAllLessonsInOutletQuery = { __typename?: 'Query', getAllLessonsInOutlet: Array<{ __typename?: 'LessonResponse', id: string, name: string, description?: string | null, state: LessonState, lessonStartTimestamptz: any, lessonEndTimestamptz: any, course: { __typename?: 'CourseResponse', id: string, name: string } }> };
 
+export type GetLessonsForEducatorQueryVariables = Exact<{
+  institutionId: Scalars['ID']['input'];
+  educatorId: Scalars['ID']['input'];
+}>;
+
+
+export type GetLessonsForEducatorQuery = { __typename?: 'Query', getEducatorById: { __typename?: 'EducatorResponse', id: string, courses: Array<{ __typename?: 'CourseResponse', id: string, name: string, lessons: Array<{ __typename?: 'LessonResponse', id: string, name: string, state: LessonState, lessonStartTimestamptz: any, lessonEndTimestamptz: any }> }> } };
+
 export type GetLessonByIdQueryVariables = Exact<{
   institutionId: Scalars['ID']['input'];
   lessonId: Scalars['ID']['input'];
@@ -1794,6 +1802,24 @@ export const GetAllLessonsInOutletDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<GetAllLessonsInOutletQuery, GetAllLessonsInOutletQueryVariables>;
+export const GetLessonsForEducatorDocument = new TypedDocumentString(`
+    query GetLessonsForEducator($institutionId: ID!, $educatorId: ID!) {
+  getEducatorById(input: {id: $educatorId, institutionId: $institutionId}) {
+    id
+    courses {
+      id
+      name
+      lessons {
+        id
+        name
+        state
+        lessonStartTimestamptz
+        lessonEndTimestamptz
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<GetLessonsForEducatorQuery, GetLessonsForEducatorQueryVariables>;
 export const GetLessonByIdDocument = new TypedDocumentString(`
     query GetLessonById($institutionId: ID!, $lessonId: ID!) {
   getLessonById(institutionId: $institutionId, lessonId: $lessonId) {
