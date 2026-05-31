@@ -1,4 +1,4 @@
-import { useRouter, type Href } from "expo-router";
+import { useRouter } from "expo-router";
 import { Pressable, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import {
@@ -33,11 +33,11 @@ export function InstitutionAccountCard({ institution, account }: Props) {
 
   const go = (target: "educator" | "parent") => {
     changeCurrentInstitution(institution);
-    const href =
-      target === "educator"
-        ? ("/(authenticated)/educator/(tabs)" as unknown as Href)
-        : "/(authenticated)/parent-client/(tabs)";
-    router.push(href);
+    if (target === "educator") {
+      router.push("/(authenticated)/educator/(tabs)");
+    } else {
+      router.push("/(authenticated)/parent-client/(tabs)");
+    }
   };
 
   const hasEducator = !!account && account.educators.length > 0;
