@@ -1,34 +1,19 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
 import Animated, { SlideInUp } from "react-native-reanimated";
-import { Ionicons } from "@expo/vector-icons";
+import { CloudOff } from "lucide-react-native";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function OfflineBanner() {
   return (
-    <Animated.View entering={SlideInUp.duration(400)} style={styles.container}>
-      <Ionicons name="cloud-offline-outline" size={18} color="#92400E" />
-      <Text style={styles.text}>
-        You're offline — showing cached data
-      </Text>
+    <Animated.View entering={SlideInUp.duration(400)}>
+      <Alert
+        icon={CloudOff}
+        className="rounded-none border-x-0 border-t-0 border-b border-amber-200 bg-amber-100"
+        iconClassName="text-amber-800"
+      >
+        <AlertDescription className="text-amber-800">
+          You&apos;re offline — showing cached data
+        </AlertDescription>
+      </Alert>
     </Animated.View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FEF3C7",
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    gap: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#FDE68A",
-  },
-  text: {
-    fontSize: 13,
-    fontWeight: "500",
-    color: "#92400E",
-    flexShrink: 1,
-  },
-});

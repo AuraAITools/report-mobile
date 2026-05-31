@@ -1,15 +1,18 @@
+import { GestureResponderEvent } from "react-native";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Text } from "@/components/ui/text";
+import { cn } from "@/lib/utils";
 import { SubjectLesson } from "@/types/models/Subject";
 import { formatTimestampToDateString } from "@/utils/DateTimeUtil";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  GestureResponderEvent,
-  StyleSheet,
-  Dimensions,
-} from "react-native";
 
-const { width, height } = Dimensions.get("window");
 type Theme = "blue" | "gray";
 
 type Props = {
@@ -29,99 +32,44 @@ const LessonCard: React.FC<Props> = ({
   buttonText,
   testID,
 }) => {
-  const styles = themeStyles[theme];
+  const isBlue = theme === "blue";
   return (
-    <View style={styles.lessonCard} testID={testID}>
-      <Text style={styles.lessonTitle}>{title}</Text>
-      <Text style={styles.lessonName}>{lesson.name}</Text>
-      <Text style={styles.lessonDate}>
-        {formatTimestampToDateString(lesson.timestamp)}
-      </Text>
-      <TouchableOpacity
-        style={styles.lessonButton}
-        onPress={handleLessonOnPress}
-      >
-        <Text style={styles.lessonButtonText}>{buttonText}</Text>
-      </TouchableOpacity>
-    </View>
+    <Card
+      className={cn(
+        "mb-2 mr-3 w-64",
+        isBlue ? "bg-[#004E89] border-[#004E89]" : "bg-muted border-muted",
+      )}
+      testID={testID}
+    >
+      <CardHeader>
+        <CardDescription className={isBlue ? "text-white/80" : undefined}>
+          {title}
+        </CardDescription>
+        <CardTitle className={isBlue ? "text-white" : undefined}>
+          {lesson.name}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Text className={cn("text-sm", isBlue ? "text-white/80" : undefined)}>
+          {formatTimestampToDateString(lesson.timestamp)}
+        </Text>
+      </CardContent>
+      <CardFooter>
+        <Button
+          variant="outline"
+          onPress={handleLessonOnPress}
+          className={cn(
+            "rounded-full",
+            isBlue && "border-white bg-transparent",
+          )}
+        >
+          <Text className={isBlue ? "text-white" : undefined}>
+            {buttonText}
+          </Text>
+        </Button>
+      </CardFooter>
+    </Card>
   );
-};
-
-const baseStyles = {
-  lessonCard: {
-    padding: height * 0.02,
-    borderRadius: width * 0.02,
-    marginBottom: height * 0.01,
-    marginRight: width * 0.03,
-  },
-  lessonTitle: {
-    fontSize: width * 0.035,
-    marginBottom: height * 0.005,
-  },
-  lessonName: {
-    fontSize: width * 0.045,
-    fontWeight: "bold" as "bold",
-    marginBottom: height * 0.01,
-  },
-  lessonDate: {
-    fontSize: width * 0.035,
-    marginBottom: height * 0.02,
-  },
-  lessonButton: {
-    paddingVertical: height * 0.01,
-    paddingHorizontal: width * 0.04,
-    borderWidth: 1,
-    borderRadius: width * 0.1,
-  },
-  lessonButtonText: {
-    textAlign: "center" as "center",
-  },
-};
-
-const themeStyles = {
-  blue: StyleSheet.create({
-    lessonCard: {
-      ...baseStyles.lessonCard,
-      backgroundColor: "#004E89",
-      color: "white",
-    },
-    lessonTitle: {
-      ...baseStyles.lessonTitle,
-      color: "white",
-    },
-    lessonName: {
-      ...baseStyles.lessonName,
-      color: "white",
-    },
-    lessonDate: {
-      ...baseStyles.lessonDate,
-      color: "white",
-    },
-    lessonButton: {
-      ...baseStyles.lessonButton,
-      borderColor: "white",
-      color: "white",
-    },
-    lessonButtonText: {
-      ...baseStyles.lessonButtonText,
-      color: "white",
-    },
-  }),
-  gray: StyleSheet.create({
-    lessonCard: {
-      ...baseStyles.lessonCard,
-      backgroundColor: "#F5F5F5",
-      color: "black",
-    },
-    lessonTitle: baseStyles.lessonTitle,
-    lessonName: baseStyles.lessonName,
-    lessonDate: baseStyles.lessonDate,
-    lessonButton: {
-      ...baseStyles.lessonButton,
-      borderColor: "black",
-    },
-    lessonButtonText: baseStyles.lessonButtonText,
-  }),
 };
 
 export default LessonCard;
