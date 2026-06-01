@@ -42,6 +42,14 @@ export default function AuthenticatedLayout() {
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="parent-client/(tabs)" options={{ title: "Home" }} />
           <Stack.Screen name="educator/(tabs)" options={{ title: "Educator" }} />
+          <Stack.Screen
+            name="educator-registration"
+            options={{ title: "Educator registration" }}
+          />
+          <Stack.Screen
+            name="parent-registration"
+            options={{ title: "Parent registration" }}
+          />
         </Stack>
       </AccountProvider>
     </InstitutionsProvider>

@@ -28,6 +28,13 @@ export enum AccountFeature {
   StaffFeature = 'STAFF_FEATURE'
 }
 
+export enum AccountFeatureState {
+  Active = 'ACTIVE',
+  Inactive = 'INACTIVE',
+  NotOnboarded = 'NOT_ONBOARDED',
+  OnboardingInProcess = 'ONBOARDING_IN_PROCESS'
+}
+
 /**
  * Minimal projection of an account, used to populate audit fields (createdBy / updatedBy)
  * on every Auditable response. Resolved lazily via @BatchMapping in
@@ -62,16 +69,16 @@ export type AccountResponse = Auditable & {
   __typename?: 'AccountResponse';
   createdAt: Scalars['Long']['output'];
   createdBy: AccountMinimalDetail;
-  educatorFeatureEnabled: Scalars['Boolean']['output'];
+  educatorFeatureState: AccountFeatureState;
   educators: Array<EducatorResponse>;
   firstName: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   lastName: Scalars['String']['output'];
   parent?: Maybe<ParentResponse>;
-  parentFeatureEnabled: Scalars['Boolean']['output'];
+  parentFeatureState: AccountFeatureState;
   /** Presigned S3 GET URL for the account's profile image. Null if no image is set. */
   profileImageUrl?: Maybe<Scalars['String']['output']>;
-  staffFeatureEnabled: Scalars['Boolean']['output'];
+  staffFeatureState: AccountFeatureState;
   status: AccountStatus;
   students: Array<StudentResponse>;
   updatedAt?: Maybe<Scalars['Long']['output']>;
@@ -104,6 +111,13 @@ export type Auditable = {
 export type ConfirmAccountProfileImageUploadInput = {
   accountId: Scalars['ID']['input'];
   /** The fileKey returned from requestAccountProfileImageUpload, after the PUT completes. */
+  fileKey: Scalars['String']['input'];
+  institutionId: Scalars['ID']['input'];
+};
+
+export type ConfirmEducatorProfileImageUploadInput = {
+  educatorId: Scalars['ID']['input'];
+  /** The fileKey returned from requestEducatorProfileImageUpload, after the PUT completes. */
   fileKey: Scalars['String']['input'];
   institutionId: Scalars['ID']['input'];
 };
@@ -379,6 +393,17 @@ export type DeleteStudentByIdInput = {
   institutionId: Scalars['ID']['input'];
 };
 
+/**
+ * Response from requestEducatorProfileImageUpload — the client uses uploadUrl to PUT bytes
+ * directly to S3, then passes fileKey back to confirmEducatorProfileImageUpload to
+ * validate dimensions/size and persist the key on the educator.
+ */
+export type EducatorProfileImageUploadResponse = {
+  __typename?: 'EducatorProfileImageUploadResponse';
+  fileKey: Scalars['String']['output'];
+  uploadUrl: Scalars['String']['output'];
+};
+
 export type EducatorResponse = Auditable & {
   __typename?: 'EducatorResponse';
   account: AccountResponse;
@@ -392,6 +417,8 @@ export type EducatorResponse = Auditable & {
   levels: Array<LevelResponse>;
   name: Scalars['String']['output'];
   outlets: Array<OutletResponse>;
+  /** Presigned S3 GET URL for the educator's profile image. Null if no image is set. */
+  profileImageUrl?: Maybe<Scalars['String']['output']>;
   startDate: Scalars['Date']['output'];
   subjects: Array<SubjectResponse>;
   updatedAt?: Maybe<Scalars['Long']['output']>;
@@ -402,12 +429,6 @@ export enum EmploymentType {
   FullTime = 'FULL_TIME',
   PartTime = 'PART_TIME'
 }
-
-export type EnableAccountFeatureInput = {
-  accountId: Scalars['ID']['input'];
-  feature: AccountFeature;
-  institutionId: Scalars['ID']['input'];
-};
 
 export type GetEducatorByIdInput = {
   id: Scalars['ID']['input'];
@@ -606,6 +627,7 @@ export type MaterialUploadResponse = {
 export type Mutation = {
   __typename?: 'Mutation';
   confirmAccountProfileImageUpload: AccountResponse;
+  confirmEducatorProfileImageUpload: EducatorResponse;
   confirmInstitutionProfileImageUpload: InstitutionResponse;
   confirmParentProfileImageUpload: ParentResponse;
   confirmStudentProfileImageUpload: StudentResponse;
@@ -638,14 +660,15 @@ export type Mutation = {
   deleteStudentById: Scalars['Boolean']['output'];
   deleteSubjectById: Scalars['Boolean']['output'];
   deleteTopicById: Scalars['Boolean']['output'];
-  enableAccountFeature: AccountResponse;
   grantUserGroupRole: Scalars['Boolean']['output'];
   requestAccountProfileImageUpload: AccountProfileImageUploadResponse;
+  requestEducatorProfileImageUpload: EducatorProfileImageUploadResponse;
   requestInstitutionProfileImageUpload: InstitutionProfileImageUploadResponse;
   requestMaterialUpload: MaterialUploadResponse;
   requestParentProfileImageUpload: ParentProfileImageUploadResponse;
   requestStudentProfileImageUpload: StudentProfileImageUploadResponse;
   revokeUserGroupRole: Scalars['Boolean']['output'];
+  updateAccountFeatureState: AccountResponse;
   updateEducatorById: EducatorResponse;
   updateOutlet: OutletResponse;
   updateOutletRoom: OutletRoomResponse;
@@ -656,6 +679,11 @@ export type Mutation = {
 
 export type MutationConfirmAccountProfileImageUploadArgs = {
   input: ConfirmAccountProfileImageUploadInput;
+};
+
+
+export type MutationConfirmEducatorProfileImageUploadArgs = {
+  input: ConfirmEducatorProfileImageUploadInput;
 };
 
 
@@ -824,11 +852,6 @@ export type MutationDeleteTopicByIdArgs = {
 };
 
 
-export type MutationEnableAccountFeatureArgs = {
-  enableAccountFeatureInput: EnableAccountFeatureInput;
-};
-
-
 export type MutationGrantUserGroupRoleArgs = {
   input: GrantUserGroupRoleInput;
 };
@@ -836,6 +859,11 @@ export type MutationGrantUserGroupRoleArgs = {
 
 export type MutationRequestAccountProfileImageUploadArgs = {
   input: RequestAccountProfileImageUploadInput;
+};
+
+
+export type MutationRequestEducatorProfileImageUploadArgs = {
+  input: RequestEducatorProfileImageUploadInput;
 };
 
 
@@ -861,6 +889,11 @@ export type MutationRequestStudentProfileImageUploadArgs = {
 
 export type MutationRevokeUserGroupRoleArgs = {
   input: RevokeUserGroupRoleInput;
+};
+
+
+export type MutationUpdateAccountFeatureStateArgs = {
+  updateAccountFeatureStateInput: UpdateAccountFeatureStateInput;
 };
 
 
@@ -1254,6 +1287,13 @@ export type RequestAccountProfileImageUploadInput = {
   institutionId: Scalars['ID']['input'];
 };
 
+export type RequestEducatorProfileImageUploadInput = {
+  /** Must be one of: image/png, image/jpeg, image/webp. */
+  contentType: Scalars['String']['input'];
+  educatorId: Scalars['ID']['input'];
+  institutionId: Scalars['ID']['input'];
+};
+
 export type RequestInstitutionProfileImageUploadInput = {
   /** Must be one of: image/png, image/jpeg, image/webp. */
   contentType: Scalars['String']['input'];
@@ -1407,6 +1447,13 @@ export type TopicResponse = Auditable & {
   updatedBy?: Maybe<AccountMinimalDetail>;
 };
 
+export type UpdateAccountFeatureStateInput = {
+  accountId: Scalars['ID']['input'];
+  feature: AccountFeature;
+  institutionId: Scalars['ID']['input'];
+  state: AccountFeatureState;
+};
+
 export type UpdateEducatorByIdInput = {
   dateOfBirth?: InputMaybe<Scalars['Date']['input']>;
   email?: InputMaybe<Scalars['String']['input']>;
@@ -1491,7 +1538,7 @@ export type GetAccountByIdQueryVariables = Exact<{
 }>;
 
 
-export type GetAccountByIdQuery = { __typename?: 'Query', getAccountById: { __typename?: 'AccountResponse', id: string, userId: string, firstName: string, lastName: string, status: AccountStatus, profileImageUrl?: string | null, educatorFeatureEnabled: boolean, parentFeatureEnabled: boolean, staffFeatureEnabled: boolean, parent?: { __typename?: 'ParentResponse', id: string, relationship: Relationship, profileImageUrl?: string | null } | null, students: Array<{ __typename?: 'StudentResponse', id: string, name: string, email: string, dateOfBirth: any, profileImageUrl?: string | null }>, educators: Array<{ __typename?: 'EducatorResponse', id: string, name: string, email: string, employmentType: EmploymentType }> } };
+export type GetAccountByIdQuery = { __typename?: 'Query', getAccountById: { __typename?: 'AccountResponse', id: string, userId: string, firstName: string, lastName: string, status: AccountStatus, profileImageUrl?: string | null, educatorFeatureState: AccountFeatureState, parentFeatureState: AccountFeatureState, staffFeatureState: AccountFeatureState, parent?: { __typename?: 'ParentResponse', id: string, relationship: Relationship, profileImageUrl?: string | null } | null, students: Array<{ __typename?: 'StudentResponse', id: string, name: string, email: string, dateOfBirth: any, profileImageUrl?: string | null }>, educators: Array<{ __typename?: 'EducatorResponse', id: string, name: string, email: string, employmentType: EmploymentType, profileImageUrl?: string | null }> } };
 
 export type GetAccountByUserIdQueryVariables = Exact<{
   institutionId: Scalars['ID']['input'];
@@ -1499,14 +1546,91 @@ export type GetAccountByUserIdQueryVariables = Exact<{
 }>;
 
 
-export type GetAccountByUserIdQuery = { __typename?: 'Query', getAccountByUserId: { __typename?: 'AccountResponse', id: string, userId: string, firstName: string, lastName: string, status: AccountStatus, profileImageUrl?: string | null, educatorFeatureEnabled: boolean, parentFeatureEnabled: boolean, staffFeatureEnabled: boolean, parent?: { __typename?: 'ParentResponse', id: string, relationship: Relationship, profileImageUrl?: string | null } | null, students: Array<{ __typename?: 'StudentResponse', id: string, name: string, email: string, dateOfBirth: any, profileImageUrl?: string | null }>, educators: Array<{ __typename?: 'EducatorResponse', id: string, name: string, email: string, employmentType: EmploymentType }> } };
+export type GetAccountByUserIdQuery = { __typename?: 'Query', getAccountByUserId: { __typename?: 'AccountResponse', id: string, userId: string, firstName: string, lastName: string, status: AccountStatus, profileImageUrl?: string | null, educatorFeatureState: AccountFeatureState, parentFeatureState: AccountFeatureState, staffFeatureState: AccountFeatureState, parent?: { __typename?: 'ParentResponse', id: string, relationship: Relationship, profileImageUrl?: string | null } | null, students: Array<{ __typename?: 'StudentResponse', id: string, name: string, email: string, dateOfBirth: any, profileImageUrl?: string | null }>, educators: Array<{ __typename?: 'EducatorResponse', id: string, name: string, email: string, employmentType: EmploymentType, profileImageUrl?: string | null }> } };
 
 export type GetAllAccountsInInstitutionQueryVariables = Exact<{
   institutionId: Scalars['ID']['input'];
 }>;
 
 
-export type GetAllAccountsInInstitutionQuery = { __typename?: 'Query', getAllAccountsInInstitution: Array<{ __typename?: 'AccountResponse', id: string, userId: string, firstName: string, lastName: string, status: AccountStatus, profileImageUrl?: string | null, parentFeatureEnabled: boolean, educatorFeatureEnabled: boolean, staffFeatureEnabled: boolean }> };
+export type GetAllAccountsInInstitutionQuery = { __typename?: 'Query', getAllAccountsInInstitution: Array<{ __typename?: 'AccountResponse', id: string, userId: string, firstName: string, lastName: string, status: AccountStatus, profileImageUrl?: string | null, parentFeatureState: AccountFeatureState, educatorFeatureState: AccountFeatureState, staffFeatureState: AccountFeatureState }> };
+
+export type UpdateEducatorByIdMutationVariables = Exact<{
+  input: UpdateEducatorByIdInput;
+}>;
+
+
+export type UpdateEducatorByIdMutation = { __typename?: 'Mutation', updateEducatorById: { __typename?: 'EducatorResponse', id: string, name: string, email: string, dateOfBirth: any, startDate: any, employmentType: EmploymentType } };
+
+export type UpdateParentByIdMutationVariables = Exact<{
+  input: UpdateParentByIdInput;
+}>;
+
+
+export type UpdateParentByIdMutation = { __typename?: 'Mutation', updateParentById: { __typename?: 'ParentResponse', id: string, relationship: Relationship, profileImageUrl?: string | null } };
+
+export type RequestAccountProfileImageUploadMutationVariables = Exact<{
+  input: RequestAccountProfileImageUploadInput;
+}>;
+
+
+export type RequestAccountProfileImageUploadMutation = { __typename?: 'Mutation', requestAccountProfileImageUpload: { __typename?: 'AccountProfileImageUploadResponse', uploadUrl: string, fileKey: string } };
+
+export type ConfirmAccountProfileImageUploadMutationVariables = Exact<{
+  input: ConfirmAccountProfileImageUploadInput;
+}>;
+
+
+export type ConfirmAccountProfileImageUploadMutation = { __typename?: 'Mutation', confirmAccountProfileImageUpload: { __typename?: 'AccountResponse', id: string, profileImageUrl?: string | null } };
+
+export type RequestParentProfileImageUploadMutationVariables = Exact<{
+  input: RequestParentProfileImageUploadInput;
+}>;
+
+
+export type RequestParentProfileImageUploadMutation = { __typename?: 'Mutation', requestParentProfileImageUpload: { __typename?: 'ParentProfileImageUploadResponse', uploadUrl: string, fileKey: string } };
+
+export type ConfirmParentProfileImageUploadMutationVariables = Exact<{
+  input: ConfirmParentProfileImageUploadInput;
+}>;
+
+
+export type ConfirmParentProfileImageUploadMutation = { __typename?: 'Mutation', confirmParentProfileImageUpload: { __typename?: 'ParentResponse', id: string, profileImageUrl?: string | null } };
+
+export type RequestEducatorProfileImageUploadMutationVariables = Exact<{
+  input: RequestEducatorProfileImageUploadInput;
+}>;
+
+
+export type RequestEducatorProfileImageUploadMutation = { __typename?: 'Mutation', requestEducatorProfileImageUpload: { __typename?: 'EducatorProfileImageUploadResponse', uploadUrl: string, fileKey: string } };
+
+export type ConfirmEducatorProfileImageUploadMutationVariables = Exact<{
+  input: ConfirmEducatorProfileImageUploadInput;
+}>;
+
+
+export type ConfirmEducatorProfileImageUploadMutation = { __typename?: 'Mutation', confirmEducatorProfileImageUpload: { __typename?: 'EducatorResponse', id: string, profileImageUrl?: string | null } };
+
+export type RequestStudentProfileImageUploadMutationVariables = Exact<{
+  input: RequestStudentProfileImageUploadInput;
+}>;
+
+
+export type RequestStudentProfileImageUploadMutation = { __typename?: 'Mutation', requestStudentProfileImageUpload: { __typename?: 'StudentProfileImageUploadResponse', uploadUrl: string, fileKey: string } };
+
+export type ConfirmStudentProfileImageUploadMutationVariables = Exact<{
+  input: ConfirmStudentProfileImageUploadInput;
+}>;
+
+
+export type ConfirmStudentProfileImageUploadMutation = { __typename?: 'Mutation', confirmStudentProfileImageUpload: { __typename?: 'StudentResponse', id: string, profileImageUrl?: string | null } };
+
+export type UpdateStudentByIdMutationVariables = Exact<{
+  input: UpdateStudentByIdInput;
+}>;
+
+
+export type UpdateStudentByIdMutation = { __typename?: 'Mutation', updateStudentById: { __typename?: 'StudentResponse', id: string, name: string, email: string, dateOfBirth: any, profileImageUrl?: string | null } };
 
 export type GetAllCoursesInOutletQueryVariables = Exact<{
   institutionId: Scalars['ID']['input'];
@@ -1583,6 +1707,13 @@ export type GetStudentByIdQueryVariables = Exact<{
 
 export type GetStudentByIdQuery = { __typename?: 'Query', getStudentById: { __typename?: 'StudentResponse', id: string, name: string, email: string, dateOfBirth: any, profileImageUrl?: string | null, level: { __typename?: 'LevelResponse', id: string, name: string, category: School_Category }, school: { __typename?: 'SchoolResponse', id: string, name: string, schoolCategory: SchoolCategory }, courses: Array<{ __typename?: 'CourseResponse', id: string, name: string, lessonFrequency: LessonFrequency, courseStartTimestamptz: any, courseEndTimestamptz: any, subjects: Array<{ __typename?: 'SubjectResponse', id: string, name: string }> }> } };
 
+export type GetAllSubjectsInInstitutionQueryVariables = Exact<{
+  institutionId: Scalars['ID']['input'];
+}>;
+
+
+export type GetAllSubjectsInInstitutionQuery = { __typename?: 'Query', getAllSubjectsInInstitution: Array<{ __typename?: 'SubjectResponse', id: string, name: string }> };
+
 export class TypedDocumentString<TResult, TVariables>
   extends String
   implements DocumentTypeDecoration<TResult, TVariables>
@@ -1611,9 +1742,9 @@ export const GetAccountByIdDocument = new TypedDocumentString(`
     lastName
     status
     profileImageUrl
-    educatorFeatureEnabled
-    parentFeatureEnabled
-    staffFeatureEnabled
+    educatorFeatureState
+    parentFeatureState
+    staffFeatureState
     parent {
       id
       relationship
@@ -1631,6 +1762,7 @@ export const GetAccountByIdDocument = new TypedDocumentString(`
       name
       email
       employmentType
+      profileImageUrl
     }
   }
 }
@@ -1644,9 +1776,9 @@ export const GetAccountByUserIdDocument = new TypedDocumentString(`
     lastName
     status
     profileImageUrl
-    educatorFeatureEnabled
-    parentFeatureEnabled
-    staffFeatureEnabled
+    educatorFeatureState
+    parentFeatureState
+    staffFeatureState
     parent {
       id
       relationship
@@ -1664,6 +1796,7 @@ export const GetAccountByUserIdDocument = new TypedDocumentString(`
       name
       email
       employmentType
+      profileImageUrl
     }
   }
 }
@@ -1677,12 +1810,108 @@ export const GetAllAccountsInInstitutionDocument = new TypedDocumentString(`
     lastName
     status
     profileImageUrl
-    parentFeatureEnabled
-    educatorFeatureEnabled
-    staffFeatureEnabled
+    parentFeatureState
+    educatorFeatureState
+    staffFeatureState
   }
 }
     `) as unknown as TypedDocumentString<GetAllAccountsInInstitutionQuery, GetAllAccountsInInstitutionQueryVariables>;
+export const UpdateEducatorByIdDocument = new TypedDocumentString(`
+    mutation UpdateEducatorById($input: UpdateEducatorByIdInput!) {
+  updateEducatorById(input: $input) {
+    id
+    name
+    email
+    dateOfBirth
+    startDate
+    employmentType
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateEducatorByIdMutation, UpdateEducatorByIdMutationVariables>;
+export const UpdateParentByIdDocument = new TypedDocumentString(`
+    mutation UpdateParentById($input: UpdateParentByIdInput!) {
+  updateParentById(input: $input) {
+    id
+    relationship
+    profileImageUrl
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateParentByIdMutation, UpdateParentByIdMutationVariables>;
+export const RequestAccountProfileImageUploadDocument = new TypedDocumentString(`
+    mutation RequestAccountProfileImageUpload($input: RequestAccountProfileImageUploadInput!) {
+  requestAccountProfileImageUpload(input: $input) {
+    uploadUrl
+    fileKey
+  }
+}
+    `) as unknown as TypedDocumentString<RequestAccountProfileImageUploadMutation, RequestAccountProfileImageUploadMutationVariables>;
+export const ConfirmAccountProfileImageUploadDocument = new TypedDocumentString(`
+    mutation ConfirmAccountProfileImageUpload($input: ConfirmAccountProfileImageUploadInput!) {
+  confirmAccountProfileImageUpload(input: $input) {
+    id
+    profileImageUrl
+  }
+}
+    `) as unknown as TypedDocumentString<ConfirmAccountProfileImageUploadMutation, ConfirmAccountProfileImageUploadMutationVariables>;
+export const RequestParentProfileImageUploadDocument = new TypedDocumentString(`
+    mutation RequestParentProfileImageUpload($input: RequestParentProfileImageUploadInput!) {
+  requestParentProfileImageUpload(input: $input) {
+    uploadUrl
+    fileKey
+  }
+}
+    `) as unknown as TypedDocumentString<RequestParentProfileImageUploadMutation, RequestParentProfileImageUploadMutationVariables>;
+export const ConfirmParentProfileImageUploadDocument = new TypedDocumentString(`
+    mutation ConfirmParentProfileImageUpload($input: ConfirmParentProfileImageUploadInput!) {
+  confirmParentProfileImageUpload(input: $input) {
+    id
+    profileImageUrl
+  }
+}
+    `) as unknown as TypedDocumentString<ConfirmParentProfileImageUploadMutation, ConfirmParentProfileImageUploadMutationVariables>;
+export const RequestEducatorProfileImageUploadDocument = new TypedDocumentString(`
+    mutation RequestEducatorProfileImageUpload($input: RequestEducatorProfileImageUploadInput!) {
+  requestEducatorProfileImageUpload(input: $input) {
+    uploadUrl
+    fileKey
+  }
+}
+    `) as unknown as TypedDocumentString<RequestEducatorProfileImageUploadMutation, RequestEducatorProfileImageUploadMutationVariables>;
+export const ConfirmEducatorProfileImageUploadDocument = new TypedDocumentString(`
+    mutation ConfirmEducatorProfileImageUpload($input: ConfirmEducatorProfileImageUploadInput!) {
+  confirmEducatorProfileImageUpload(input: $input) {
+    id
+    profileImageUrl
+  }
+}
+    `) as unknown as TypedDocumentString<ConfirmEducatorProfileImageUploadMutation, ConfirmEducatorProfileImageUploadMutationVariables>;
+export const RequestStudentProfileImageUploadDocument = new TypedDocumentString(`
+    mutation RequestStudentProfileImageUpload($input: RequestStudentProfileImageUploadInput!) {
+  requestStudentProfileImageUpload(input: $input) {
+    uploadUrl
+    fileKey
+  }
+}
+    `) as unknown as TypedDocumentString<RequestStudentProfileImageUploadMutation, RequestStudentProfileImageUploadMutationVariables>;
+export const ConfirmStudentProfileImageUploadDocument = new TypedDocumentString(`
+    mutation ConfirmStudentProfileImageUpload($input: ConfirmStudentProfileImageUploadInput!) {
+  confirmStudentProfileImageUpload(input: $input) {
+    id
+    profileImageUrl
+  }
+}
+    `) as unknown as TypedDocumentString<ConfirmStudentProfileImageUploadMutation, ConfirmStudentProfileImageUploadMutationVariables>;
+export const UpdateStudentByIdDocument = new TypedDocumentString(`
+    mutation UpdateStudentById($input: UpdateStudentByIdInput!) {
+  updateStudentById(input: $input) {
+    id
+    name
+    email
+    dateOfBirth
+    profileImageUrl
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateStudentByIdMutation, UpdateStudentByIdMutationVariables>;
 export const GetAllCoursesInOutletDocument = new TypedDocumentString(`
     query GetAllCoursesInOutlet($institutionId: ID!, $outletId: ID!) {
   getAllCoursesInOutlet(institutionId: $institutionId, outletId: $outletId) {
@@ -1961,3 +2190,11 @@ export const GetStudentByIdDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<GetStudentByIdQuery, GetStudentByIdQueryVariables>;
+export const GetAllSubjectsInInstitutionDocument = new TypedDocumentString(`
+    query GetAllSubjectsInInstitution($institutionId: ID!) {
+  getAllSubjectsInInstitution(institutionId: $institutionId) {
+    id
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<GetAllSubjectsInInstitutionQuery, GetAllSubjectsInInstitutionQueryVariables>;

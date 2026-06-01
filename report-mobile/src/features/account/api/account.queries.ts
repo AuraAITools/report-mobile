@@ -12,9 +12,9 @@ const GetAccountByIdDocument = graphql(/* GraphQL */ `
       lastName
       status
       profileImageUrl
-      educatorFeatureEnabled
-      parentFeatureEnabled
-      staffFeatureEnabled
+      educatorFeatureState
+      parentFeatureState
+      staffFeatureState
       parent {
         id
         relationship
@@ -32,6 +32,7 @@ const GetAccountByIdDocument = graphql(/* GraphQL */ `
         name
         email
         employmentType
+        profileImageUrl
       }
     }
   }
@@ -46,9 +47,9 @@ export const GetAccountByUserIdDocument = graphql(/* GraphQL */ `
       lastName
       status
       profileImageUrl
-      educatorFeatureEnabled
-      parentFeatureEnabled
-      staffFeatureEnabled
+      educatorFeatureState
+      parentFeatureState
+      staffFeatureState
       parent {
         id
         relationship
@@ -66,6 +67,7 @@ export const GetAccountByUserIdDocument = graphql(/* GraphQL */ `
         name
         email
         employmentType
+        profileImageUrl
       }
     }
   }
@@ -80,9 +82,9 @@ const GetAllAccountsInInstitutionDocument = graphql(/* GraphQL */ `
       lastName
       status
       profileImageUrl
-      parentFeatureEnabled
-      educatorFeatureEnabled
-      staffFeatureEnabled
+      parentFeatureState
+      educatorFeatureState
+      staffFeatureState
     }
   }
 `);

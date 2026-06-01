@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { type Href, useRouter } from "expo-router";
 import { Pressable, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import {
@@ -12,9 +12,10 @@ import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useInstitutionsContext } from "@/components/providers/InstitutionsProvider";
-import type {
-  GetAccountByUserIdQuery,
-  GetInstitutionsByIdsQuery,
+import {
+  AccountFeatureState,
+  type GetAccountByUserIdQuery,
+  type GetInstitutionsByIdsQuery,
 } from "@/generated/graphql/graphql";
 
 type Account = GetAccountByUserIdQuery["getAccountByUserId"];
@@ -31,12 +32,30 @@ export function InstitutionAccountCard({ institution, account }: Props) {
   const router = useRouter();
   const { changeCurrentInstitution } = useInstitutionsContext();
 
-  const go = (target: "educator" | "parent") => {
+  const handleEducator = () => {
+    if (!account) return;
     changeCurrentInstitution(institution);
-    if (target === "educator") {
+    if (account.educatorFeatureState === AccountFeatureState.Active) {
       router.push("/(authenticated)/educator/(tabs)");
-    } else {
+    } else if (
+      account.educatorFeatureState === AccountFeatureState.OnboardingInProcess
+    ) {
+      router.push({
+        pathname: "/(authenticated)/educator-registration",
+        params: { educatorId: account.educators[0]?.id },
+      } as unknown as Href);
+    }
+  };
+
+  const handleParent = () => {
+    if (!account) return;
+    changeCurrentInstitution(institution);
+    if (account.parentFeatureState === AccountFeatureState.Active) {
       router.push("/(authenticated)/parent-client/(tabs)");
+    } else if (
+      account.parentFeatureState === AccountFeatureState.OnboardingInProcess
+    ) {
+      router.push("/(authenticated)/parent-registration" as unknown as Href);
     }
   };
 
@@ -75,15 +94,15 @@ export function InstitutionAccountCard({ institution, account }: Props) {
                 icon="school-outline"
                 label="Educator"
                 count={account!.educators.length}
-                ctaLabel="View as Educator"
-                onPress={() => go("educator")}
-                disabled={!account!.educatorFeatureEnabled}
+                cta={ctaForState(account!.educatorFeatureState, "educator")}
+                onPress={handleEducator}
               >
                 {account!.educators.map((e) => (
                   <PersonRow
                     key={e.id}
                     name={e.name}
                     subtitle={formatEmployment(e.employmentType)}
+                    url={e.profileImageUrl}
                   />
                 ))}
               </RoleSection>
@@ -98,9 +117,8 @@ export function InstitutionAccountCard({ institution, account }: Props) {
                 label="Parent"
                 count={account!.students.length}
                 countLabel="students"
-                ctaLabel="View as Parent"
-                onPress={() => go("parent")}
-                disabled={!account!.parentFeatureEnabled}
+                cta={ctaForState(account!.parentFeatureState, "parent")}
+                onPress={handleParent}
               >
                 <PersonRow
                   name={`${account!.firstName} ${account!.lastName}`}
@@ -128,23 +146,27 @@ export function InstitutionAccountCard({ institution, account }: Props) {
   );
 }
 
+type Cta = {
+  label: string;
+  disabled: boolean;
+  hint?: string;
+};
+
 function RoleSection({
   icon,
   label,
   count,
   countLabel,
-  ctaLabel,
+  cta,
   onPress,
-  disabled,
   children,
 }: {
   icon: React.ComponentProps<typeof Ionicons>["name"];
   label: string;
   count?: number;
   countLabel?: string;
-  ctaLabel: string;
+  cta: Cta;
   onPress: () => void;
-  disabled?: boolean;
   children?: React.ReactNode;
 }) {
   return (
@@ -164,30 +186,64 @@ function RoleSection({
 
       <View className="gap-2">{children}</View>
 
-      <Pressable
-        onPress={disabled ? undefined : onPress}
-        disabled={disabled}
-        className={`flex-row items-center justify-between rounded-md px-3 py-2.5 ${
-          disabled
-            ? "bg-muted opacity-60"
-            : "bg-secondary active:bg-secondary/80"
-        }`}
-      >
-        <Text
-          className={`text-sm font-medium ${
-            disabled ? "text-muted-foreground" : "text-secondary-foreground"
+      <View className="gap-1">
+        <Pressable
+          onPress={cta.disabled ? undefined : onPress}
+          disabled={cta.disabled}
+          className={`flex-row items-center justify-between rounded-md px-3 py-2.5 ${
+            cta.disabled
+              ? "bg-muted opacity-60"
+              : "bg-secondary active:bg-secondary/80"
           }`}
         >
-          {disabled ? "Feature not enabled" : ctaLabel}
-        </Text>
-        <Ionicons
-          name={disabled ? "lock-closed-outline" : "chevron-forward"}
-          size={16}
-          color="#6B7280"
-        />
-      </Pressable>
+          <Text
+            className={`text-sm font-medium ${
+              cta.disabled ? "text-muted-foreground" : "text-secondary-foreground"
+            }`}
+          >
+            {cta.label}
+          </Text>
+          <Ionicons
+            name={cta.disabled ? "lock-closed-outline" : "chevron-forward"}
+            size={16}
+            color="#6B7280"
+          />
+        </Pressable>
+        {cta.hint && (
+          <Text className="text-muted-foreground px-1 text-xs">{cta.hint}</Text>
+        )}
+      </View>
     </View>
   );
+}
+
+function ctaForState(
+  state: AccountFeatureState,
+  role: "educator" | "parent",
+): Cta {
+  const roleLabel = role === "educator" ? "Educator" : "Parent";
+  switch (state) {
+    case AccountFeatureState.Active:
+      return { label: `View as ${roleLabel}`, disabled: false };
+    case AccountFeatureState.OnboardingInProcess:
+      return {
+        label: `Complete ${role} registration`,
+        disabled: false,
+        hint: "Finish setting up your account to continue",
+      };
+    case AccountFeatureState.NotOnboarded:
+      return {
+        label: `${roleLabel} access not set up`,
+        disabled: true,
+        hint: "Ask your admin to start your onboarding",
+      };
+    case AccountFeatureState.Inactive:
+      return {
+        label: `${roleLabel} access inactive`,
+        disabled: true,
+        hint: "This feature has been deactivated by your admin",
+      };
+  }
 }
 
 function PersonRow({

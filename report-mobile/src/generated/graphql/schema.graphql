@@ -30,6 +30,13 @@ enum AccountFeature {
   STAFF_FEATURE
 }
 
+enum AccountFeatureState {
+  ACTIVE
+  INACTIVE
+  NOT_ONBOARDED
+  ONBOARDING_IN_PROCESS
+}
+
 """
 Minimal projection of an account, used to populate audit fields (createdBy / updatedBy)
 on every Auditable response. Resolved lazily via @BatchMapping in
@@ -63,18 +70,18 @@ type AccountProfileImageUploadResponse {
 type AccountResponse implements Auditable {
   createdAt: Long!
   createdBy: AccountMinimalDetail!
-  educatorFeatureEnabled: Boolean!
+  educatorFeatureState: AccountFeatureState!
   educators: [EducatorResponse!]!
   firstName: String!
   id: ID!
   lastName: String!
   parent: ParentResponse
-  parentFeatureEnabled: Boolean!
+  parentFeatureState: AccountFeatureState!
   """
   Presigned S3 GET URL for the account's profile image. Null if no image is set.
   """
   profileImageUrl: String
-  staffFeatureEnabled: Boolean!
+  staffFeatureState: AccountFeatureState!
   status: AccountStatus!
   students: [StudentResponse!]!
   updatedAt: Long
@@ -108,6 +115,15 @@ input ConfirmAccountProfileImageUploadInput {
   accountId: ID!
   """
   The fileKey returned from requestAccountProfileImageUpload, after the PUT completes.
+  """
+  fileKey: String!
+  institutionId: ID!
+}
+
+input ConfirmEducatorProfileImageUploadInput {
+  educatorId: ID!
+  """
+  The fileKey returned from requestEducatorProfileImageUpload, after the PUT completes.
   """
   fileKey: String!
   institutionId: ID!
@@ -396,6 +412,16 @@ input DeleteStudentByIdInput {
   institutionId: ID!
 }
 
+"""
+Response from requestEducatorProfileImageUpload — the client uses uploadUrl to PUT bytes
+directly to S3, then passes fileKey back to confirmEducatorProfileImageUpload to
+validate dimensions/size and persist the key on the educator.
+"""
+type EducatorProfileImageUploadResponse {
+  fileKey: String!
+  uploadUrl: String!
+}
+
 type EducatorResponse implements Auditable {
   account: AccountResponse!
   courses: [CourseResponse!]!
@@ -408,6 +434,10 @@ type EducatorResponse implements Auditable {
   levels: [LevelResponse!]!
   name: String!
   outlets: [OutletResponse!]!
+  """
+  Presigned S3 GET URL for the educator's profile image. Null if no image is set.
+  """
+  profileImageUrl: String
   startDate: Date!
   subjects: [SubjectResponse!]!
   updatedAt: Long
@@ -417,12 +447,6 @@ type EducatorResponse implements Auditable {
 enum EmploymentType {
   FULL_TIME
   PART_TIME
-}
-
-input EnableAccountFeatureInput {
-  accountId: ID!
-  feature: AccountFeature!
-  institutionId: ID!
 }
 
 input GetEducatorByIdInput {
@@ -618,6 +642,7 @@ type MaterialUploadResponse {
 
 type Mutation {
   confirmAccountProfileImageUpload(input: ConfirmAccountProfileImageUploadInput!): AccountResponse!
+  confirmEducatorProfileImageUpload(input: ConfirmEducatorProfileImageUploadInput!): EducatorResponse!
   confirmInstitutionProfileImageUpload(input: ConfirmInstitutionProfileImageUploadInput!): InstitutionResponse!
   confirmParentProfileImageUpload(input: ConfirmParentProfileImageUploadInput!): ParentResponse!
   confirmStudentProfileImageUpload(input: ConfirmStudentProfileImageUploadInput!): StudentResponse!
@@ -650,14 +675,15 @@ type Mutation {
   deleteStudentById(input: DeleteStudentByIdInput!): Boolean!
   deleteSubjectById(id: ID!, institutionId: ID!): Boolean!
   deleteTopicById(id: ID!, institutionId: ID!): Boolean!
-  enableAccountFeature(enableAccountFeatureInput: EnableAccountFeatureInput!): AccountResponse!
   grantUserGroupRole(input: GrantUserGroupRoleInput!): Boolean!
   requestAccountProfileImageUpload(input: RequestAccountProfileImageUploadInput!): AccountProfileImageUploadResponse!
+  requestEducatorProfileImageUpload(input: RequestEducatorProfileImageUploadInput!): EducatorProfileImageUploadResponse!
   requestInstitutionProfileImageUpload(input: RequestInstitutionProfileImageUploadInput!): InstitutionProfileImageUploadResponse!
   requestMaterialUpload(input: RequestMaterialUploadInput!): MaterialUploadResponse!
   requestParentProfileImageUpload(input: RequestParentProfileImageUploadInput!): ParentProfileImageUploadResponse!
   requestStudentProfileImageUpload(input: RequestStudentProfileImageUploadInput!): StudentProfileImageUploadResponse!
   revokeUserGroupRole(input: RevokeUserGroupRoleInput!): Boolean!
+  updateAccountFeatureState(updateAccountFeatureStateInput: UpdateAccountFeatureStateInput!): AccountResponse!
   updateEducatorById(input: UpdateEducatorByIdInput!): EducatorResponse!
   updateOutlet(updateOutletInput: UpdateOutletInput!): OutletResponse!
   updateOutletRoom(updateOutletRoomInput: UpdateOutletRoomInput!): OutletRoomResponse!
@@ -822,6 +848,13 @@ input RequestAccountProfileImageUploadInput {
   institutionId: ID!
 }
 
+input RequestEducatorProfileImageUploadInput {
+  """Must be one of: image/png, image/jpeg, image/webp."""
+  contentType: String!
+  educatorId: ID!
+  institutionId: ID!
+}
+
 input RequestInstitutionProfileImageUploadInput {
   """Must be one of: image/png, image/jpeg, image/webp."""
   contentType: String!
@@ -968,6 +1001,13 @@ type TopicResponse implements Auditable {
   name: String!
   updatedAt: Long
   updatedBy: AccountMinimalDetail
+}
+
+input UpdateAccountFeatureStateInput {
+  accountId: ID!
+  feature: AccountFeature!
+  institutionId: ID!
+  state: AccountFeatureState!
 }
 
 input UpdateEducatorByIdInput {

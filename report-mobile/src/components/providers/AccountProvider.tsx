@@ -37,6 +37,8 @@ export function AccountProvider(props: PropsWithChildren) {
           signal,
         ),
       enabled: !!userId,
+      refetchInterval: 5 * 1000,
+      refetchIntervalInBackground: false,
       select: (data: GetAccountByUserIdQuery) => data.getAccountByUserId,
     })),
   });

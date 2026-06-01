@@ -6,7 +6,11 @@ import { getTokenRefresher } from "./auth/token-refresher";
 
 const GRAPHQL_ENDPOINT = `${env.reportApiUrl.replace(/\/+$/, "")}/graphql`;
 
-type GraphQLResponseError = { message: string };
+type GraphQLResponseError = {
+  message: string;
+  path?: ReadonlyArray<string | number>;
+  extensions?: Record<string, unknown>;
+};
 
 type GraphQLResponse<TResult> = {
   data?: TResult;
@@ -167,6 +171,13 @@ export async function graphqlClient<TResult, TVariables>(
 
   if (json.errors?.length) {
     const message = json.errors.map((e) => e.message).join("; ");
+    if (__DEV__) {
+      console.warn("[graphqlClient] GraphQL errors", {
+        errors: json.errors,
+        query: document.toString(),
+        variables,
+      });
+    }
     notifyError(message);
     throw new GraphQLClientError(message, json.errors);
   }

@@ -54,6 +54,13 @@
           "sounds": [],
           "defaultChannel": "default"
         }
+      ],
+      "@react-native-community/datetimepicker",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Aura uses your photos to set your profile picture."
+        }
       ]
     ],
     "experiments": {
