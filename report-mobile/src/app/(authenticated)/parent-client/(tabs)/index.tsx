@@ -9,6 +9,8 @@ import {
   Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import LessonCard from "@/components/ui/LessonCard";
 import { Exam } from "@/types/models/Exam";
 import { Subject } from "@/types/models/Subject";
@@ -20,7 +22,16 @@ import { Lesson } from "@/types/models/Lesson";
 const { width, height } = Dimensions.get("window");
 
 const HomeScreen = () => {
+  const router = useRouter();
   const { userInfo } = useAuth();
+
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace("/(authenticated)");
+    }
+  };
   const [tuitionCenter, setTuitionCenter] = useState<string>("");
   const [studentSubjects, setStudentSubjects] = useState<Subject[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<Subject>();
@@ -142,6 +153,17 @@ const HomeScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
+      <View style={styles.backRow}>
+        <TouchableOpacity
+          onPress={handleBack}
+          testID="parent-home-back"
+          hitSlop={12}
+          style={styles.backButton}
+        >
+          <Ionicons name="chevron-back" size={22} color="#374151" />
+          <Text style={styles.backLabel}>Accounts</Text>
+        </TouchableOpacity>
+      </View>
       <ScrollView style={styles.container} testID="home-screen">
         <View style={styles.header} testID="home-header">
         <View style={styles.headerTextContainer}>
@@ -233,6 +255,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+  },
+  backRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: width * 0.02,
+    paddingTop: height * 0.005,
+  },
+  backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: width * 0.02,
+    paddingVertical: height * 0.008,
+  },
+  backLabel: {
+    fontSize: width * 0.04,
+    color: "#374151",
   },
   header: {
     padding: height * 0.02,

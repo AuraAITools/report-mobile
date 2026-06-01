@@ -100,6 +100,10 @@ const GetLessonByIdDocument = graphql(/* GraphQL */ `
         name
         fileUrl
         description
+        topics {
+          id
+          name
+        }
       }
       lessonPlans {
         id

@@ -587,6 +587,7 @@ export type MaterialResponse = Auditable & {
   fileUrl?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
+  topics: Array<TopicResponse>;
   updatedAt?: Maybe<Scalars['Long']['output']>;
   updatedBy?: Maybe<AccountMinimalDetail>;
 };
@@ -1016,10 +1017,14 @@ export type Query = {
   getAllSubjectsInInstitution: Array<SubjectResponse>;
   getAllTopicsInInstitution: Array<TopicResponse>;
   getCourseById: CourseResponse;
+  getCoursesByEducatorId: Array<CourseResponse>;
+  getCoursesByStudentId: Array<CourseResponse>;
   getEducatorById: EducatorResponse;
   getInstitution: InstitutionResponse;
   getInstitutionsByIds: Array<InstitutionResponse>;
   getLessonById: LessonResponse;
+  getLessonsByEducatorId: Array<LessonResponse>;
+  getLessonsByStudentId: Array<LessonResponse>;
   getLevelByIdInInstitution: LevelResponse;
   getLevelByPage: LevelResponseConnection;
   getLevelsInInstitution: Array<LevelResponse>;
@@ -1117,6 +1122,18 @@ export type QueryGetCourseByIdArgs = {
 };
 
 
+export type QueryGetCoursesByEducatorIdArgs = {
+  educatorId: Scalars['ID']['input'];
+  institutionId: Scalars['ID']['input'];
+};
+
+
+export type QueryGetCoursesByStudentIdArgs = {
+  institutionId: Scalars['ID']['input'];
+  studentId: Scalars['ID']['input'];
+};
+
+
 export type QueryGetEducatorByIdArgs = {
   input: GetEducatorByIdInput;
 };
@@ -1135,6 +1152,18 @@ export type QueryGetInstitutionsByIdsArgs = {
 export type QueryGetLessonByIdArgs = {
   institutionId: Scalars['ID']['input'];
   lessonId: Scalars['ID']['input'];
+};
+
+
+export type QueryGetLessonsByEducatorIdArgs = {
+  educatorId: Scalars['ID']['input'];
+  institutionId: Scalars['ID']['input'];
+};
+
+
+export type QueryGetLessonsByStudentIdArgs = {
+  institutionId: Scalars['ID']['input'];
+  studentId: Scalars['ID']['input'];
 };
 
 
@@ -1538,7 +1567,7 @@ export type GetLessonByIdQueryVariables = Exact<{
 }>;
 
 
-export type GetLessonByIdQuery = { __typename?: 'Query', getLessonById: { __typename?: 'LessonResponse', id: string, name: string, description?: string | null, state: LessonState, lessonStartTimestamptz: any, lessonEndTimestamptz: any, recap?: string | null, course: { __typename?: 'CourseResponse', id: string, name: string }, outlet: { __typename?: 'OutletResponse', id: string, name: string }, outletRoom?: { __typename?: 'OutletRoomResponse', id: string, name: string } | null, educators: Array<{ __typename?: 'EducatorResponse', id: string, name: string }>, students: Array<{ __typename?: 'StudentResponse', id: string, name: string }>, subjects: Array<{ __typename?: 'SubjectResponse', id: string, name: string }>, topics: Array<{ __typename?: 'TopicResponse', id: string, name: string }>, materials: Array<{ __typename?: 'MaterialResponse', id: string, name: string, fileUrl?: string | null, description?: string | null }>, lessonPlans: Array<{ __typename?: 'LessonPlanResponse', id: string, plan: string, state: LessonPlanState }>, lessonObjectives: Array<{ __typename?: 'LessonObjectiveResponse', id: string, name: string, objective: string }> } };
+export type GetLessonByIdQuery = { __typename?: 'Query', getLessonById: { __typename?: 'LessonResponse', id: string, name: string, description?: string | null, state: LessonState, lessonStartTimestamptz: any, lessonEndTimestamptz: any, recap?: string | null, course: { __typename?: 'CourseResponse', id: string, name: string }, outlet: { __typename?: 'OutletResponse', id: string, name: string }, outletRoom?: { __typename?: 'OutletRoomResponse', id: string, name: string } | null, educators: Array<{ __typename?: 'EducatorResponse', id: string, name: string }>, students: Array<{ __typename?: 'StudentResponse', id: string, name: string }>, subjects: Array<{ __typename?: 'SubjectResponse', id: string, name: string }>, topics: Array<{ __typename?: 'TopicResponse', id: string, name: string }>, materials: Array<{ __typename?: 'MaterialResponse', id: string, name: string, fileUrl?: string | null, description?: string | null, topics: Array<{ __typename?: 'TopicResponse', id: string, name: string }> }>, lessonPlans: Array<{ __typename?: 'LessonPlanResponse', id: string, plan: string, state: LessonPlanState }>, lessonObjectives: Array<{ __typename?: 'LessonObjectiveResponse', id: string, name: string, objective: string }> } };
 
 export type GetAllStudentsInInstitutionQueryVariables = Exact<{
   institutionId: Scalars['ID']['input'];
@@ -1863,6 +1892,10 @@ export const GetLessonByIdDocument = new TypedDocumentString(`
       name
       fileUrl
       description
+      topics {
+        id
+        name
+      }
     }
     lessonPlans {
       id

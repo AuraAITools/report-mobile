@@ -601,6 +601,7 @@ type MaterialResponse implements Auditable {
   fileUrl: String
   id: ID!
   name: String!
+  topics: [TopicResponse!]!
   updatedAt: Long
   updatedBy: AccountMinimalDetail
 }
@@ -786,10 +787,14 @@ type Query {
   getAllSubjectsInInstitution(institutionId: ID!): [SubjectResponse!]!
   getAllTopicsInInstitution(institutionId: ID!): [TopicResponse!]!
   getCourseById(courseId: ID!): CourseResponse!
+  getCoursesByEducatorId(educatorId: ID!, institutionId: ID!): [CourseResponse!]!
+  getCoursesByStudentId(institutionId: ID!, studentId: ID!): [CourseResponse!]!
   getEducatorById(input: GetEducatorByIdInput!): EducatorResponse!
   getInstitution(institutionId: ID!): InstitutionResponse!
   getInstitutionsByIds(institutionIds: [ID!]!): [InstitutionResponse!]!
   getLessonById(institutionId: ID!, lessonId: ID!): LessonResponse!
+  getLessonsByEducatorId(educatorId: ID!, institutionId: ID!): [LessonResponse!]!
+  getLessonsByStudentId(institutionId: ID!, studentId: ID!): [LessonResponse!]!
   getLevelByIdInInstitution(institutionId: ID!, levelId: ID!): LevelResponse!
   getLevelByPage(after: String, before: String, first: Int, institutionId: ID!, last: Int, search: LevelSearchInput, sort: SortInput): LevelResponseConnection!
   getLevelsInInstitution(institutionId: ID!): [LevelResponse!]!

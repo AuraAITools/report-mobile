@@ -1,6 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { graphql } from "@/generated/graphql";
 import { graphqlClient } from "@/lib/graphql-client";
+import type { GetAllCoursesInOutletQuery } from "@/generated/graphql/graphql";
 import { courseKeys } from "./courses.keys";
 
 const GetAllCoursesInOutletDocument = graphql(/* GraphQL */ `
@@ -90,6 +92,47 @@ export function useGetAllCoursesInOutlet(
     enabled: !!institutionId && !!outletId,
     select: (data) => data.getAllCoursesInOutlet,
   });
+}
+
+export function useGetCoursesAcrossOutlets(
+  institutionId: string | undefined,
+  outletIds: readonly string[],
+) {
+  const queries = useQueries({
+    queries: outletIds.map((outletId) => ({
+      queryKey: institutionId
+        ? courseKeys.byOutlet(institutionId, outletId)
+        : courseKeys.all,
+      queryFn: ({ signal }: { signal: AbortSignal }) =>
+        graphqlClient(
+          GetAllCoursesInOutletDocument,
+          { institutionId: institutionId!, outletId },
+          signal,
+        ),
+      enabled: !!institutionId,
+      select: (data: GetAllCoursesInOutletQuery) => data.getAllCoursesInOutlet,
+    })),
+  });
+
+  const data = useMemo(() => {
+    const seen = new Set<string>();
+    const out: GetAllCoursesInOutletQuery["getAllCoursesInOutlet"] = [];
+    for (const q of queries) {
+      for (const c of q.data ?? []) {
+        if (seen.has(c.id)) continue;
+        seen.add(c.id);
+        out.push(c);
+      }
+    }
+    return out;
+  }, [queries]);
+
+  return {
+    data,
+    isLoading: queries.some((q) => q.isLoading),
+    isError: queries.some((q) => q.isError),
+    refetch: () => queries.forEach((q) => q.refetch()),
+  };
 }
 
 export function useGetCourseById(courseId: string | undefined) {

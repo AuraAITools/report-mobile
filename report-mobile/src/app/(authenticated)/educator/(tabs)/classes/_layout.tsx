@@ -1,11 +1,10 @@
 import { Stack } from "expo-router";
 
-export default function EducatorLessonsLayout() {
+export default function EducatorClassesLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
-      <Stack.Screen name="[lessonId]" />
-      <Stack.Screen name="plans/[planId]" />
+      <Stack.Screen name="[classId]" />
     </Stack>
   );
 }

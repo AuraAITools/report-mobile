@@ -20,6 +20,13 @@ import {
 } from "@/features/lessons";
 import { formatTimestampToDateString } from "@/utils/DateTimeUtil";
 
+type FilterField = "courseName" | "state";
+
+const FILTER_FIELDS: { id: FilterField; label: string }[] = [
+  { id: "courseName", label: "Course" },
+  { id: "state", label: "State" },
+];
+
 export default function EducatorLessonsList() {
   const router = useRouter();
   const { currentInstitution } = useInstitutionsContext();
@@ -30,25 +37,66 @@ export default function EducatorLessonsList() {
     useGetLessonsForEducator(currentInstitution?.id, educatorId);
 
   const [search, setSearch] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  // field -> set of active values
+  const [activeFilters, setActiveFilters] = useState<
+    Record<FilterField, Set<string>>
+  >({ courseName: new Set(), state: new Set() });
+
+  const valuesByField = useMemo(() => {
+    const result: Record<FilterField, string[]> = {
+      courseName: [],
+      state: [],
+    };
+    for (const field of FILTER_FIELDS) {
+      const seen = new Set<string>();
+      for (const l of lessons) {
+        const v = l[field.id];
+        if (!v || seen.has(v)) continue;
+        seen.add(v);
+      }
+      result[field.id] = Array.from(seen).sort((a, b) => a.localeCompare(b));
+    }
+    return result;
+  }, [lessons]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     const sorted = [...lessons].sort(
-      (a, b) => b.lessonStartTimestamptz - a.lessonStartTimestamptz,
+      (a, b) => a.lessonStartTimestamptz - b.lessonStartTimestamptz,
     );
-    if (!q) return sorted;
-    return sorted.filter(
-      (l) =>
-        l.name.toLowerCase().includes(q) ||
-        l.courseName.toLowerCase().includes(q),
-    );
-  }, [lessons, search]);
+    return sorted.filter((l) => {
+      if (q) {
+        const matchesSearch =
+          l.name.toLowerCase().includes(q) ||
+          l.courseName.toLowerCase().includes(q);
+        if (!matchesSearch) return false;
+      }
+      for (const field of FILTER_FIELDS) {
+        const active = activeFilters[field.id];
+        if (active.size > 0 && !active.has(l[field.id])) return false;
+      }
+      return true;
+    });
+  }, [lessons, search, activeFilters]);
+
+  const toggleFilter = (field: FilterField, value: string) => {
+    setActiveFilters((prev) => {
+      const nextSet = new Set(prev[field]);
+      if (nextSet.has(value)) nextSet.delete(value);
+      else nextSet.add(value);
+      return { ...prev, [field]: nextSet };
+    });
+  };
+
+  const filterCount =
+    activeFilters.courseName.size + activeFilters.state.size;
 
   return (
     <SafeAreaView className="bg-background flex-1" edges={["top", "left", "right"]}>
       <View className="px-4 pt-2 pb-3">
         <Text className="text-2xl font-bold">Lessons</Text>
-        <View className="mt-3 flex-row items-center">
+        <View className="mt-3 flex-row items-center gap-2">
           <View className="border-input bg-background flex-1 flex-row items-center rounded-md border px-3">
             <Ionicons name="search" size={16} color="#6B7280" />
             <Input
@@ -61,7 +109,89 @@ export default function EducatorLessonsList() {
               className="ml-2 flex-1 border-0 bg-transparent shadow-none"
             />
           </View>
+          <Pressable
+            onPress={() => setShowFilters((v) => !v)}
+            testID="lessons-filter-toggle"
+            className={`relative h-10 w-10 items-center justify-center rounded-md border ${
+              showFilters || filterCount > 0
+                ? "bg-secondary border-secondary"
+                : "border-input bg-background"
+            } active:opacity-70`}
+          >
+            <Ionicons name="options-outline" size={18} color="#374151" />
+            {filterCount > 0 ? (
+              <View className="bg-primary absolute -right-1 -top-1 h-4 min-w-4 items-center justify-center rounded-full px-1">
+                <Text className="text-primary-foreground text-[10px] font-bold">
+                  {filterCount}
+                </Text>
+              </View>
+            ) : null}
+          </Pressable>
         </View>
+
+        {showFilters ? (
+          <View className="mt-3">
+            <View className="flex-row items-center justify-between">
+              <Text className="text-muted-foreground text-xs font-semibold uppercase">
+                Filters
+              </Text>
+              {filterCount > 0 ? (
+                <Pressable
+                  onPress={() =>
+                    setActiveFilters({
+                      courseName: new Set(),
+                      state: new Set(),
+                    })
+                  }
+                  testID="lessons-filter-clear"
+                  hitSlop={8}
+                >
+                  <Text className="text-primary text-xs font-medium">
+                    Clear
+                  </Text>
+                </Pressable>
+              ) : null}
+            </View>
+            {FILTER_FIELDS.map((field) => {
+              const values = valuesByField[field.id];
+              if (values.length === 0) return null;
+              return (
+                <View key={field.id} className="mt-2">
+                  <Text className="text-muted-foreground text-[11px] font-medium">
+                    {field.label}
+                  </Text>
+                  <View className="mt-1 flex-row flex-wrap gap-2">
+                    {values.map((v) => {
+                      const active = activeFilters[field.id].has(v);
+                      return (
+                        <Pressable
+                          key={v}
+                          onPress={() => toggleFilter(field.id, v)}
+                          testID={`lessons-filter-${field.id}-${v}`}
+                          className={`rounded-full border px-3 py-1.5 active:opacity-70 ${
+                            active
+                              ? "bg-primary border-primary"
+                              : "border-input bg-background"
+                          }`}
+                        >
+                          <Text
+                            className={`text-xs font-medium ${
+                              active
+                                ? "text-primary-foreground"
+                                : "text-foreground"
+                            }`}
+                          >
+                            {v}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        ) : null}
       </View>
 
       {isLoading ? (
@@ -92,7 +222,9 @@ export default function EducatorLessonsList() {
           ListEmptyComponent={
             <View className="items-center py-12">
               <Text className="text-muted-foreground text-sm">
-                {search ? "No matching lessons" : "No lessons yet"}
+                {search || filterCount > 0
+                  ? "No matching lessons"
+                  : "No lessons yet"}
               </Text>
             </View>
           }
