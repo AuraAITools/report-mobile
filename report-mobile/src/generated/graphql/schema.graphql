@@ -517,6 +517,7 @@ type LessonPlanResponse implements Auditable {
   id: ID!
   lesson: LessonResponse!
   plan: String!
+  recap: String!
   state: LessonPlanState!
   topics: [TopicResponse!]!
   updatedAt: Long
@@ -545,7 +546,6 @@ type LessonResponse implements Auditable {
   name: String!
   outlet: OutletResponse!
   outletRoom: OutletRoomResponse
-  recap: String
   state: LessonState!
   students: [StudentResponse!]!
   subjects: [SubjectResponse!]!

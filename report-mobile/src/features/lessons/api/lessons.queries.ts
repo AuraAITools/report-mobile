@@ -12,7 +12,6 @@ const GetAllLessonsInCourseDocument = graphql(/* GraphQL */ `
       state
       lessonStartTimestamptz
       lessonEndTimestamptz
-      recap
       subjects {
         id
         name
@@ -66,7 +65,6 @@ const GetLessonByIdDocument = graphql(/* GraphQL */ `
       state
       lessonStartTimestamptz
       lessonEndTimestamptz
-      recap
       course {
         id
         name
