@@ -77,6 +77,7 @@ export function InstitutionAccountCard({ institution, account }: Props) {
                 count={account!.educators.length}
                 ctaLabel="View as Educator"
                 onPress={() => go("educator")}
+                disabled={!account!.educatorFeatureEnabled}
               >
                 {account!.educators.map((e) => (
                   <PersonRow
@@ -99,6 +100,7 @@ export function InstitutionAccountCard({ institution, account }: Props) {
                 countLabel="students"
                 ctaLabel="View as Parent"
                 onPress={() => go("parent")}
+                disabled={!account!.parentFeatureEnabled}
               >
                 <PersonRow
                   name={`${account!.firstName} ${account!.lastName}`}
@@ -133,6 +135,7 @@ function RoleSection({
   countLabel,
   ctaLabel,
   onPress,
+  disabled,
   children,
 }: {
   icon: React.ComponentProps<typeof Ionicons>["name"];
@@ -141,6 +144,7 @@ function RoleSection({
   countLabel?: string;
   ctaLabel: string;
   onPress: () => void;
+  disabled?: boolean;
   children?: React.ReactNode;
 }) {
   return (
@@ -161,13 +165,26 @@ function RoleSection({
       <View className="gap-2">{children}</View>
 
       <Pressable
-        onPress={onPress}
-        className="bg-secondary active:bg-secondary/80 flex-row items-center justify-between rounded-md px-3 py-2.5"
+        onPress={disabled ? undefined : onPress}
+        disabled={disabled}
+        className={`flex-row items-center justify-between rounded-md px-3 py-2.5 ${
+          disabled
+            ? "bg-muted opacity-60"
+            : "bg-secondary active:bg-secondary/80"
+        }`}
       >
-        <Text className="text-secondary-foreground text-sm font-medium">
-          {ctaLabel}
+        <Text
+          className={`text-sm font-medium ${
+            disabled ? "text-muted-foreground" : "text-secondary-foreground"
+          }`}
+        >
+          {disabled ? "Feature not enabled" : ctaLabel}
         </Text>
-        <Ionicons name="chevron-forward" size={16} color="#6B7280" />
+        <Ionicons
+          name={disabled ? "lock-closed-outline" : "chevron-forward"}
+          size={16}
+          color="#6B7280"
+        />
       </Pressable>
     </View>
   );
